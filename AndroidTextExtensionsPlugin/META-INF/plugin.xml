@@ -1,0 +1,65 @@
+<!--
+  ~ Copyright (c) 2015 DigitasLBi.
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and limitations under the License.
+  -->
+
+<idea-plugin version="1">
+    <id>digitaslbi.ext.idea.plugin</id>
+    <name>Android Text Extensions Plugin</name>
+    <version>0.0.1</version>
+    <vendor email="support@digitaslbi.com" url="http://www.digitaslbi.com/uk/">DigitasLBi</vendor>
+
+    <description><![CDATA[
+      A plugin to auto-generate the Java classes and XML style resources for the custom font extension
+      from the <a href="https://github.com/DigitasLbiMobile/AndroidTextExtensions">Android Text Extensions</a> library.
+    ]]></description>
+
+    <change-notes><![CDATA[
+      <em>Version 0.0.1</em><br>
+      <ul><li>Initial implementation.</li></ul>
+    ]]>
+    </change-notes>
+
+    <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="131"/>
+
+    <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+        <component>
+            <implementation-class>digitaslbi.ext.idea.plugin.MainProjectComponent</implementation-class>
+        </component>
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="AndroidTextExtensions.Generate" class="digitaslbi.ext.idea.plugin.GenerateAction"
+                text="Generate text styles for fonts"
+                description="Generate TextAppearance styles based on asset fonts.">
+            <add-to-group group-id="ProjectViewPopupMenu"
+                          anchor="after"
+                          relative-to-action="ProjectViewPopupMenuRefactoringGroup"/>
+        </action>
+    </actions>
+
+</idea-plugin>
