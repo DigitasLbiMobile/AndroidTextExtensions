@@ -11,7 +11,7 @@
   -->
 
 <idea-plugin version="1">
-    <id>digitaslbi.ext.idea.plugin</id>
+    <id>digitaslbi.ext.plugin</id>
     <name>Android Text Extensions Plugin</name>
     <version>0.0.1</version>
     <vendor email="support@digitaslbi.com" url="http://www.digitaslbi.com/uk/">DigitasLBi</vendor>
@@ -47,13 +47,13 @@
     <project-components>
         <!-- Add your project components here -->
         <component>
-            <implementation-class>digitaslbi.ext.idea.plugin.MainProjectComponent</implementation-class>
+            <implementation-class>digitaslbi.ext.plugin.MainProjectComponent</implementation-class>
         </component>
     </project-components>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="AndroidTextExtensions.Generate" class="digitaslbi.ext.idea.plugin.GenerateAction"
+        <action id="AndroidTextExtensions.Generate" class="digitaslbi.ext.plugin.GenerateAction"
                 text="Generate text styles for fonts"
                 description="Generate TextAppearance styles based on asset fonts.">
             <add-to-group group-id="ProjectViewPopupMenu"
