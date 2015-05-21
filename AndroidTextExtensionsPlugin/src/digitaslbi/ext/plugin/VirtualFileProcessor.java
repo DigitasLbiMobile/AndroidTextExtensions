@@ -14,14 +14,16 @@ package digitaslbi.ext.plugin;
 
 import com.google.common.collect.ImmutableList;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
+import com.intellij.util.Processor;
 import digitaslbi.ext.common.FontFamily;
 import digitaslbi.ext.generator.BootstrapClassGenerator;
-import digitaslbi.ext.generator.FileProcessor;
 import digitaslbi.ext.generator.CodeGenerator;
 import digitaslbi.ext.generator.CodeGenerator.FileType;
+import digitaslbi.ext.generator.FileProcessor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -30,25 +32,31 @@ import java.util.*;
 
 import static digitaslbi.ext.common.Constants.ASSETS_FOLDER;
 import static digitaslbi.ext.plugin.CommandHelper.runReadCommand;
-import static digitaslbi.ext.plugin.CommandHelper.runWriteCommand;
 import static java.lang.String.format;
 
 /**
  * Created by vrabiee on 18/05/15.
  */
-public class VirtualFileProcessor extends FileProcessor {
+public abstract class VirtualFileProcessor extends FileProcessor {
+
+    public static final String ASSETS_PACKAGE = "src/main/assets";
 
     protected final Project project;
+    protected final VirtualFile assetsFolder;
 
     public VirtualFileProcessor(CodeGenerator generator, BootstrapClassGenerator bootstrapClassGenerator, Project project) {
         super(generator, bootstrapClassGenerator);
         this.project = project;
+        this.assetsFolder = findAssetsFolder(project);
     }
 
     public VirtualFileProcessor(CodeGenerator generator, Project project) {
         super(generator);
         this.project = project;
+        this.assetsFolder = findAssetsFolder(project);
     }
+
+    public abstract void generate(final VirtualFile input) throws Exception;
 
     private void collectFiles(final VirtualFile input, final Collection<VirtualFile> files) {
         if (input.isDirectory()) {
@@ -66,8 +74,7 @@ public class VirtualFileProcessor extends FileProcessor {
         }
     }
 
-    public List<FontFamily> process(final VirtualFile input) {
-        final VirtualFile assetsFolder = findAssetsFolder(input);
+    protected List<FontFamily> process(final VirtualFile input) {
         if (assetsFolder == null) {
             Log.e(getClass(), "Can't find the '%s' folder", ASSETS_FOLDER);
             Dialogs.showFolderNotFoundDialog(ASSETS_FOLDER, project);
@@ -75,7 +82,7 @@ public class VirtualFileProcessor extends FileProcessor {
         }
 
         final HashMap<String, FontFamily> map = new HashMap<String, FontFamily>();
-        final Collection<VirtualFile> files = new ArrayList<>();
+        final Collection<VirtualFile> files = new ArrayList<VirtualFile>();
         collectFiles(input, files);
 
         for (final VirtualFile file : files) {
@@ -102,37 +109,32 @@ public class VirtualFileProcessor extends FileProcessor {
         return file.getFileType().isBinary() && isValidFontExtension(file.getName());
     }
 
-    public void delete(final String fileName, FileType fileType, final Project project) {
-        final String fileNameWithExt = fileName + fileType.getExtension();
-        runWriteCommand(project, new Runnable() {
-            @Override
-            public void run() {
-                VfsUtilCore.visitChildrenRecursively(project.getBaseDir(), new VirtualFileVisitor(VirtualFileVisitor.SKIP_ROOT) {
-                    @Override
-                    public boolean visitFile(@NotNull VirtualFile file) {
-                        if (file.getName().equals(fileNameWithExt)) {
-                            try {
-                                file.delete(null);
-                            } catch (IOException e) {
-                                Log.e(getClass(), e, "Failed to delete file %s.", fileNameWithExt);
-                                Dialogs.showErrorDialog(format("Failed to delete file %s:\n%s", fileNameWithExt, e.getMessage()), project);
-                            }
-                            return false;
-                        }
-                        return true;
+    public void delete(final String fileName, final Project project) {
+        Log.d(getClass(), "Deleting %s.", fileName);
+
+        VfsUtilCore.processFilesRecursively(project.getBaseDir(), new Processor<VirtualFile>() {
+            @Override public boolean process(VirtualFile file) {
+                if (file.getName().equals(fileName)) {
+                    try {
+                        file.delete(null);
+                    } catch (IOException e) {
+                        Log.e(getClass(), e, "Failed to delete file %s.", file);
+                        Dialogs.showErrorDialog(format("Failed to delete file %s:\n%s", file, e.getMessage()), project);
                     }
-                });
+                    return false;
+                }
+                return true;
             }
         });
     }
 
 
-    public static VirtualFile findAssetsFolder(final VirtualFile input) {
-        if (input.isDirectory() && input.getName().equals(ASSETS_FOLDER)) {
-            return input;
-        }
-        if (input.getParent() != null) {
-            return findAssetsFolder(input.getParent());
+    public static VirtualFile findAssetsFolder(Project project) {
+        final VirtualFile[] sourceRoots = ProjectRootManager.getInstance(project).getContentSourceRoots();
+        for (VirtualFile file : sourceRoots) {
+            if (file.getPath().endsWith(ASSETS_PACKAGE)) {
+                return file;
+            }
         }
         return null;
     }

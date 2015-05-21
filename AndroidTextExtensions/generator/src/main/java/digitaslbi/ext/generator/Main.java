@@ -12,17 +12,21 @@
 
 package digitaslbi.ext.generator;
 
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Properties;
 
 /**
  * The **generator** module is used by the **IdeaPlugin** to auto-generate the necessary sources and resources
  * to support the custom fonts extension.
- *
+ * <p/>
  * It can also be used as a standalone jar.
- *
+ * <p/>
  * __TODO__ add example
  */
 public class Main {
@@ -64,8 +68,20 @@ public class Main {
         final File resOutputDir = new File(outputPath, RES_PATH);
         resOutputDir.mkdirs();
 
-        new FileProcessor(new FontFamilyClassGenerator(packageName), new BootstrapClassGenerator(packageName))
-                .generate(inputDir, classOutputDir);
+        final VelocityEngine ve = new VelocityEngine();
+        final Properties properties = new Properties();
+        properties.setProperty("resource.loader", "file");
+        properties.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        ve.init(properties);
+
+        final VelocityContext vc = new VelocityContext();
+        final Template classTemplate = ve.getTemplate("FontFamily.java.vm");
+        final Template bootstrapTemplate = ve.getTemplate("FontFamilies.java.vm");
+
+        final FontFamilyClassGenerator classGenerator = new FontFamilyClassGenerator(packageName, classTemplate, vc);
+        final BootstrapClassGenerator bootstrapClassGenerator = new BootstrapClassGenerator(packageName, bootstrapTemplate, vc);
+
+        new FileProcessor(classGenerator, bootstrapClassGenerator).generate(inputDir, classOutputDir);
         new FileProcessor(new FontFamilyStyleGenerator()).generate(inputDir, resOutputDir);
     }
 }

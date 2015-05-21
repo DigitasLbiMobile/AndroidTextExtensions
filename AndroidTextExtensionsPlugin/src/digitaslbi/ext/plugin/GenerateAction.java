@@ -20,10 +20,19 @@ import digitaslbi.ext.common.Constants;
 import digitaslbi.ext.generator.BootstrapClassGenerator;
 import digitaslbi.ext.generator.FontFamilyClassGenerator;
 import digitaslbi.ext.generator.FontFamilyStyleGenerator;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.jetbrains.android.facet.AndroidFacet;
+import org.jetbrains.android.sdk.AndroidSdkUtils;
+import org.jetbrains.android.util.AndroidUtils;
+
+import java.util.List;
 
 import static com.intellij.openapi.actionSystem.DataKeys.VIRTUAL_FILE;
 import static digitaslbi.ext.common.Constants.ASSETS_FOLDER;
 import static digitaslbi.ext.common.Constants.GENERATED_PACKAGE_NAME;
+import static digitaslbi.ext.plugin.MainProjectComponent.initVelocity;
 
 /**
  * Created by evelina on 14/05/15.
@@ -37,15 +46,26 @@ public class GenerateAction extends AnAction {
             return;
         }
 
+        List<AndroidFacet> facets = AndroidUtils.getApplicationFacets(project);
+        if(facets.isEmpty()) {
+            Log.d(getClass(), "Not an Android project. Skipping.");
+            return;
+        }
+
+        final VelocityEngine ve = initVelocity(getClass());
+        final VelocityContext vc = new VelocityContext();
+
+        final Template classTemplate = ve.getTemplate("FontFamily.java.vm");
+        final Template bootstrapTemplate = ve.getTemplate("FontFamilies.java.vm");
+
+        final FontFamilyClassGenerator classGenerator = new FontFamilyClassGenerator(GENERATED_PACKAGE_NAME, classTemplate, vc);
+        final BootstrapClassGenerator bootstrapClassGenerator = new BootstrapClassGenerator(GENERATED_PACKAGE_NAME, bootstrapTemplate, vc);
+
         final VirtualFile selectedFile = VIRTUAL_FILE.getData(actionEvent.getDataContext());
         if (isAssetsFolder(selectedFile)) {
             try {
-                new FontFamilyClassFileProcessor(new FontFamilyClassGenerator(GENERATED_PACKAGE_NAME),
-                        new BootstrapClassGenerator(GENERATED_PACKAGE_NAME), project)
-                        .generate(selectedFile);
-
-                new FontFamilyStyleFileProcessor(new FontFamilyStyleGenerator(), project)
-                        .generate(selectedFile);
+                new FontFamilyClassProcessor(classGenerator, bootstrapClassGenerator, project).generate(selectedFile);
+                new FontFamilyStyleProcessor(new FontFamilyStyleGenerator(), project).generate(selectedFile);
             } catch (Exception e) {
                 Log.e(getClass(), e, "Failed to generate files with exception.");
                 Dialogs.showErrorDialog("AndroidExtensionsPlugin failed with exception:\n" + e.getMessage(), project);

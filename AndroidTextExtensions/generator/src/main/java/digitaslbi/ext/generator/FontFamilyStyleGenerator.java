@@ -16,7 +16,6 @@ import com.google.common.base.Function;
 import com.google.common.io.CharStreams;
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import static digitaslbi.ext.common.Font.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -38,7 +37,7 @@ import static digitaslbi.ext.generator.FileProcessor.getFileName;
  */
 public class FontFamilyStyleGenerator implements CodeGenerator {
 
-    private final Transformer transformer;
+    protected final Transformer transformer;
 
     public FontFamilyStyleGenerator() throws TransformerConfigurationException {
         transformer = TransformerFactory.newInstance().newTransformer();
@@ -90,7 +89,7 @@ public class FontFamilyStyleGenerator implements CodeGenerator {
     }
 
     private Element appendStyle(Document doc, FontFamily fontFamily, Font font) {
-        final String styleName = nameToStyleName(font.getName());
+        final String styleName = font.getStyleName();
         Element style = doc.createElement("style");
         style.setAttribute("name", styleName);
 
