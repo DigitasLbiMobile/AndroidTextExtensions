@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="DigitasLBi" pattern="file:*.java||file[AndroidTextExtensionsPlugin]:*/" />
+</component>
