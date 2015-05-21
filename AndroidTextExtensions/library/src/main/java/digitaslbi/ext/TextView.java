@@ -22,12 +22,12 @@ import java.util.Collection;
 
 /**
  * Extends {@link android.widget.TextView} to delegate functionality to a collection
- * of extensions based on {@link TextExtension}.
+ * of extensions based on {@link ViewExtension}.
  */
 public class TextView extends android.widget.TextView {
 
     public static final int DEFAULT_STYLE_ATTR = android.R.attr.textViewStyle;
-    protected TextViewExtensions<android.widget.TextView> mExtensions = new TextViewExtensions<>();
+    protected TextViewExtensionsManager<android.widget.TextView> mExtensions = new TextViewExtensionsManager<>();
 
     public TextView(Context context) {
         super(context);
@@ -50,13 +50,13 @@ public class TextView extends android.widget.TextView {
         mExtensions.init(context, attrs, defStyleAttr, defStyleRes, DEFAULT_STYLE_ATTR, this);
     }
 
-    public Collection<TextExtension<android.widget.TextView>> getExtensions() {
+    public Collection<ViewExtension<android.widget.TextView>> getExtensions() {
         return mExtensions.get();
     }
 
     @SuppressWarnings("unchecked")
-    public <E extends TextExtension<android.widget.TextView>> E getExtension(Class<E> clazz) {
-        for (TextExtension<android.widget.TextView> extension : getExtensions()) {
+    public <E extends ViewExtension<android.widget.TextView>> E getExtension(Class<E> clazz) {
+        for (ViewExtension<android.widget.TextView> extension : getExtensions()) {
             if (extension.getClass().equals(clazz)) {
                 return (E) extension;
             }
@@ -64,7 +64,7 @@ public class TextView extends android.widget.TextView {
         return null;
     }
 
-    public void addExtension(TextExtension<android.widget.TextView> extension) {
+    public void addExtension(ViewExtension<android.widget.TextView> extension) {
         mExtensions.add(extension, this);
     }
 

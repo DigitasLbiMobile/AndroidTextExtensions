@@ -54,24 +54,6 @@
             android:layout_height="wrap_content"
             android:text="From code setFont() [Chewy]"/>
 
-    <digitaslbi.ext.CheckedTextView
-            android:id="@+id/textView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="From code setFont() [PermanentMarker]"/>
 
-    <digitaslbi.ext.Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Push me"/>
-
-    <digitaslbi.ext.Button
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/PermanentMarker"
-            android:text="Push me now!"/>
 
 </LinearLayout>

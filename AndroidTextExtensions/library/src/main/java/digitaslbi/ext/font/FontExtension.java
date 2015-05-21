@@ -14,16 +14,15 @@ package digitaslbi.ext.font;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import digitaslbi.ext.DefaultTextExtension;
-import digitaslbi.ext.TextExtension;
-import digitaslbi.ext.TextViewExtensions;
+import digitaslbi.ext.ExtensionsManager;
+import digitaslbi.ext.ViewExtension;
 import digitaslbi.ext.common.Font;
 
 /**
- * Implements {@link TextExtension} to provide custom fonts for
+ * Implements {@link ViewExtension} to provide custom fonts for
  * subclasses of {@link android.widget.TextView} via {@link android.graphics.Typeface}.
  */
-public class FontExtension<T extends android.widget.TextView> extends DefaultTextExtension<T> {
+public class FontExtension<T extends android.widget.TextView> extends ViewExtension<T> {
 
     public FontExtension(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -34,7 +33,7 @@ public class FontExtension<T extends android.widget.TextView> extends DefaultTex
     }
 
     @Override
-    public void setTextView(T textView) {
+    public void setView(T textView) {
         FontManager.getInstance().applyFont(textView, textView.getContext(), mAttrs, mDefStyleAttr, mDefStyleRes);
     }
 
@@ -44,6 +43,6 @@ public class FontExtension<T extends android.widget.TextView> extends DefaultTex
 
     @Override
     public int getFlag() {
-        return TextViewExtensions.FONT_EXTENSION;
+        return ExtensionsManager.FONT_EXTENSION;
     }
 }

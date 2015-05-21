@@ -15,6 +15,7 @@ package digitaslbi.ext;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.font.FontExtension;
 
@@ -25,21 +26,23 @@ import java.util.Map;
 /**
  * A collection of
  */
-public class TextViewExtensions<T extends android.widget.TextView> {
+public class ExtensionsManager <T extends android.view.View>{
 
     public static final int FONT_EXTENSION = 0x01;
     public static final int BORDER_EXTENSION = 0x02;
     public static final int CLEARABLE_EXTENSION = 0x04;
     public static final int DRAWABLE_EXTENSION = 0x08;
 
-    private final Map<Integer, TextExtension<T>> mExtensions = new HashMap<>();
+    protected final Map<Integer, ViewExtension<T>> mViewExtensions = new HashMap<>();
+
+
 
     public void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes, int fallbackStyleAttr, T textView) {
         collect(context, attrs, defStyleAttr, defStyleRes);
         if (get().isEmpty()) {
             collect(context, attrs, fallbackStyleAttr, 0);
         }
-        setTextView(textView);
+        setView(textView);
     }
 
     public void collect(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
@@ -49,46 +52,30 @@ public class TextViewExtensions<T extends android.widget.TextView> {
         }
         TypedArray array = context.obtainStyledAttributes(attrs, new int[]{R.attr.extensions}, defStyleAttr, defStyleRes);
         int extensionFlags = array.getInt(0, 0);
-        if ((extensionFlags & FONT_EXTENSION) != 0) {
-            mExtensions.put(FONT_EXTENSION, new FontExtension<T>(context, attrs, defStyleAttr, defStyleRes));
-        }
+        //TODO MANAGE OTHER EXTENSIONS HERE
         array.recycle();
     }
 
-    public void setTextView(T textView) {
-        L.d(this, "Initializing extensions for %s: %s", textView, mExtensions);
-        for (TextExtension<T> extension : mExtensions.values()) {
-            extension.setTextView(textView);
+    public void setView(T view) {
+        L.d(this, "Initializing extensions for %s: %s", view, mViewExtensions);
+        for (ViewExtension<T> extension : mViewExtensions.values()) {
+            extension.setView(view);
         }
     }
 
-    public void add(TextExtension<T> extension, T textView) {
+    public void add(ViewExtension<T> extension, T view) {
         add(extension);
-        extension.setTextView(textView);
+        extension.setView(view);
     }
 
-    public void add(TextExtension<T> extension) {
-        if (!mExtensions.containsKey(extension.getFlag())) {
-            mExtensions.put(extension.getFlag(), extension);
+    public void add(ViewExtension<T> extension) {
+        if (!mViewExtensions.containsKey(extension.getFlag())) {
+            mViewExtensions.put(extension.getFlag(), extension);
         }
     }
 
-    public Collection<TextExtension<T>> get() {
-        return mExtensions.values();
+    public Collection<ViewExtension<T>> get() {
+        return mViewExtensions.values();
     }
 
-    public void setFont(Font font, T textView, int defaultStyleAttr) {
-        boolean found = false;
-        for (TextExtension<T> extension : get()) {
-            if (extension instanceof FontExtension) {
-                found = true;
-                ((FontExtension<T>) extension).applyFont(textView, font);
-            }
-        }
-        if (!found) {
-            FontExtension<T> fontExtension = new FontExtension<>(textView.getContext(), defaultStyleAttr);
-            fontExtension.applyFont(textView, font);
-            add(fontExtension);
-        }
-    }
 }

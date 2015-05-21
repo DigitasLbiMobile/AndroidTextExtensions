@@ -16,9 +16,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import digitaslbi.ext.CheckedTextView;
 import digitaslbi.ext.TextView;
 import digitaslbi.ext.fonts.Chewy;
+import digitaslbi.ext.fonts.ComingSoon;
 import digitaslbi.ext.fonts.PermanentMarker;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,10 +29,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TextView textView = (TextView) findViewById(R.id.textView5);
-        textView.setFont(Chewy.Chewy);
+        textView.setFont(PermanentMarker.PermanentMarker);
 
-        CheckedTextView textView1 = (CheckedTextView) findViewById(R.id.textView6);
-        textView1.setFont(PermanentMarker.PermanentMarker);
     }
 
     @Override
