@@ -14,5 +14,14 @@
 <resources>
     <attr name="extensions" format="string">
         <flag name="font" value="0x01"/>
+        <flag name="multiDrawable" value="0x02"/>
+
     </attr>
+    <!-- ================================================================ -->
+    <!-- Font Extension Attributes -->
+    <!-- ================================================================ -->
+    <declare-styleable name="FontExtension">
+        <attr name="android:fontFamily"/>
+    </declare-styleable>
+
 </resources>

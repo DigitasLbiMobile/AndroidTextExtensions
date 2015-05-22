@@ -13,18 +13,21 @@
 package digitaslbi.ext;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 /**
  * Created by vrabiee on 12/05/15.
  */
 public abstract class ViewExtension<V extends android.view.View> {
 
+    protected final Context mContext;
+    protected final AttributeSet mAttrs;
+    protected final int mDefStyleAttr;
+    protected final int mDefStyleRes;
     protected V mView;
-    protected Context mContext;
-    protected AttributeSet mAttrs;
-    protected int mDefStyleAttr;
-    protected int mDefStyleRes;
 
     public ViewExtension(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
@@ -37,5 +40,26 @@ public abstract class ViewExtension<V extends android.view.View> {
         mView = view;
     }
 
-    public abstract int getFlag();
+    public abstract Extension getExtensionId();
+
+    public abstract void onPreDraw(Canvas canvas);
+
+    public abstract void onDraw(Canvas canvas);
+
+    public abstract void onTouchEvent(MotionEvent event);
+
+    public abstract void onAttachedToWindow();
+
+    public abstract void onDetachedFromWindow();
+
+    public abstract void onFinishInflate();
+
+    public abstract void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect);
+
+    public abstract void drawableStateChanged();
+
+    public abstract void drawableHotspotChanged(float x, float y);
+
+    public abstract void onSizeChanged(int width, int height);
+
 }
