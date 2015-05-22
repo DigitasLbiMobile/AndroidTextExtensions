@@ -14,15 +14,24 @@ package digitaslbi.ext;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+
+import java.util.Collection;
+
+import digitaslbi.ext.drawables.DrawableRepresentation;
+import digitaslbi.ext.drawables.MultiDrawablesExtension;
 
 /**
  * Created by anatriep on 21/05/2015.
  */
 public class View extends android.view.View {
+
+    protected ExtensionsManager<android.view.View> mExtensions = new ExtensionsManager<>();
 
     private Rect mIntrinsicPadding;
 
@@ -49,21 +58,72 @@ public class View extends android.view.View {
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         updateIntrinsicPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+        mExtensions.init(context, attrs, defStyleAttr, defStyleRes, 0, this);
     }
 
-    public void addDrawable(Drawable drawable, int zOrder) {
-        //TODO
+    public Collection<ViewExtension<android.view.View>> getExtensions() {
+        return mExtensions.get();
     }
 
-    public void removeDrawable(Drawable drawable) {
-
+    public <E extends ViewExtension<android.view.View>> E getExtension(Extension extensionId) {
+        return (E) mExtensions.findExtension(extensionId);
     }
 
+    public void addExtension(ViewExtension<android.view.View> extension) {
+        mExtensions.add(extension, this);
+    }
+
+    public DrawableRepresentation addDrawable(Drawable drawable, Rect insets, int zOrder) {
+        MultiDrawablesExtension<android.view.View> drawablesExtension = (MultiDrawablesExtension<android.view.View>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+        if (drawablesExtension == null) {
+            drawablesExtension = new MultiDrawablesExtension<>(getContext(), null, 0, 0);
+            drawablesExtension.setView(this);
+            mExtensions.add(drawablesExtension);
+        }
+        return drawablesExtension.addDrawable(drawable, insets, zOrder);
+    }
+
+    public void removeDrawable(DrawableRepresentation drawable) {
+        MultiDrawablesExtension<android.view.View> drawablesExtension = (MultiDrawablesExtension<android.view.View>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+        if (drawablesExtension != null) {
+            drawablesExtension.removeDrawable(drawable);
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (!MultiDrawablesExtension.EMPTY_RECT.equals(getExtraPadding())) {
+            setTotalPadding();
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
 
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
         updateIntrinsicPadding(left, top, right, bottom);
-        super.setPadding(left, top, right, bottom);
+
+        if (!MultiDrawablesExtension.EMPTY_RECT.equals(getExtraPadding())) {
+            setTotalPadding();
+        } else {
+            super.setPadding(left, top, right, bottom);
+        }
+    }
+
+    private Rect getExtraPadding() {
+        MultiDrawablesExtension<android.view.View> drawablesExtension = (MultiDrawablesExtension<android.view.View>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+        Rect extraPadding = MultiDrawablesExtension.EMPTY_RECT;
+        if (drawablesExtension != null) {
+            extraPadding = drawablesExtension.getInsets();
+        }
+        return extraPadding;
+    }
+
+    private void setTotalPadding() {
+        Rect extraPadding = getExtraPadding();
+        super.setPadding(mIntrinsicPadding.left + extraPadding.left,
+                mIntrinsicPadding.top + extraPadding.top,
+                mIntrinsicPadding.right + extraPadding.right,
+                mIntrinsicPadding.bottom + extraPadding.bottom);
     }
 
     private void updateIntrinsicPadding(int left, int top, int right, int bottom) {
@@ -73,5 +133,27 @@ public class View extends android.view.View {
         mIntrinsicPadding.set(left, top, right, bottom);
     }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+    }
 
+    @Override
+    protected void onDraw(@NonNull Canvas canvas) {
+        for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
+            extension.onPreDraw(canvas);
+        }
+        super.onDraw(canvas);
+        for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
+            extension.onDraw(canvas);
+        }
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
+            extension.drawableStateChanged();
+        }
+    }
 }

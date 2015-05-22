@@ -11,11 +11,15 @@
   ~ See the License for the specific language governing permissions and limitations under the License.
   -->
 
-<resources>
-    <!-- ================================================================ -->
-    <!-- Font Extension Attributes -->
-    <!-- ================================================================ -->
-    <declare-styleable name="FontExtension">
-        <attr name="android:fontFamily"/>
-    </declare-styleable>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#ff0000"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#b5b5b4"/>
+        </shape>
+    </item>
+</selector>

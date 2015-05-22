@@ -15,42 +15,24 @@ package digitaslbi.ext;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.widget.*;
 
-import digitaslbi.ext.common.Font;
 import digitaslbi.ext.font.FontExtension;
 
 /**
  * Created by anatriep on 21/05/2015.
  */
-public class TextViewExtensionsManager<T extends android.widget.TextView> extends ExtensionsManager<T>{
+public class TextViewExtensionsManager<T extends android.widget.TextView> extends ExtensionsManager<T> {
 
     @Override
     public void collect(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super.collect(context,attrs,defStyleAttr,defStyleRes);
+        super.collect(context, attrs, defStyleAttr, defStyleRes);
 
         TypedArray array = context.obtainStyledAttributes(attrs, new int[]{R.attr.extensions}, defStyleAttr, defStyleRes);
         int extensionFlags = array.getInt(0, 0);
-        if ((extensionFlags & FONT_EXTENSION) != 0) {
-            mViewExtensions.put(FONT_EXTENSION, new FontExtension<T>(context, attrs, defStyleAttr, defStyleRes));
+        if ((extensionFlags & Extension.FONT_EXTENSION.getId()) != 0) {
+            mViewExtensions.put(Extension.FONT_EXTENSION, new FontExtension<T>(context, attrs, defStyleAttr, defStyleRes));
         }
         array.recycle();
-    }
-
-
-    public void setFont(Font font, T textView, int defaultStyleAttr) {
-        boolean found = false;
-        for (ViewExtension<T> extension : get()) {
-            if (extension instanceof FontExtension) {
-                found = true;
-                ((FontExtension<T>) extension).applyFont(textView, font);
-            }
-        }
-        if (!found) {
-            FontExtension<T> fontExtension = new FontExtension<>(textView.getContext(), defaultStyleAttr);
-            fontExtension.applyFont(textView, font);
-            add(fontExtension);
-        }
     }
 
 }

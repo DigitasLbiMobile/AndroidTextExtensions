@@ -17,23 +17,29 @@ import android.content.res.TypedArray;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import digitaslbi.ext.L;
 import digitaslbi.ext.R;
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-
 import static android.text.TextUtils.isEmpty;
 import static com.google.common.collect.FluentIterable.from;
 import static digitaslbi.ext.common.Constants.BOOTSTRAP_CLASS_NAME;
 import static digitaslbi.ext.common.Constants.GENERATED_PACKAGE_NAME;
-import static digitaslbi.ext.common.Font.*;
+import static digitaslbi.ext.common.Font.nameToStyleName;
 
 
 /**
@@ -271,12 +277,14 @@ public class FontManager {
     private Optional<Font> findFont(final String fontFamily) {
         return from(mFontFamilies)
                 .transformAndConcat(new Function<FontFamily, Iterable<Font>>() {
-                    @Override public Iterable<Font> apply(FontFamily input) {
+                    @Override
+                    public Iterable<Font> apply(FontFamily input) {
                         return input.getFonts();
                     }
                 })
                 .filter(new Predicate<Font>() {
-                    @Override public boolean apply(Font input) {
+                    @Override
+                    public boolean apply(Font input) {
                         return nameToStyleName(input.getName()).equals(fontFamily);
                     }
                 }).first();

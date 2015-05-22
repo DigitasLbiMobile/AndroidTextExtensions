@@ -10,94 +10,41 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package digitaslbi.ext;
+package digitaslbi.ext.drawables;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 import java.util.ArrayList;
 
+import digitaslbi.ext.BaseViewExtension;
+import digitaslbi.ext.Extension;
+
 /**
  * Created by anatriep on 21/05/2015.
  */
-public class DrawableManager extends ViewExtension<View> {
+public class MultiDrawablesExtension<T extends android.view.View> extends BaseViewExtension<T> {
 
-    private static final Rect sRectZero = new Rect();
+    public static final Rect EMPTY_RECT = new Rect();
+    public static final int Z_ORDER_VIEW_DRAWING = 100;
 
-    public DrawableManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    private ArrayList<DrawableRepresentation> mDrawables;
+    private Rect mTotalDrawableInsets;
+
+    public MultiDrawablesExtension(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mDrawables = new ArrayList<>();
         mTotalDrawableInsets = new Rect();
-    }
-
-    private static class DrawableRepresentation implements Comparable<DrawableRepresentation> {
-
-        private final int mZOrder;
-        private final Drawable mDrawable;
-        private final Rect mInsets;
-
-        @Override
-        public int compareTo(DrawableRepresentation drawableRepresentation) {
-            return this.mZOrder - drawableRepresentation.mZOrder;
-        }
-
-        private DrawableRepresentation(Builder builder) {
-            this.mZOrder = builder.zOrder;
-            this.mDrawable = builder.drawable;
-            this.mInsets = builder.insets;
-        }
-
-        public int getZOrder() {
-            return mZOrder;
-        }
-
-        public Drawable getDrawable() {
-            return mDrawable;
-        }
-
-        public Rect getInsets() {
-            return mInsets;
-        }
-
-
-        public static class Builder {
-            private int zOrder;
-            private Drawable drawable;
-            private Rect insets;
-
-            public Builder withZOrder(int zOrder) {
-                this.zOrder = zOrder;
-                return this;
-            }
-
-            public Builder withDrawable(Drawable drawable) {
-                this.drawable = drawable;
-                return this;
-            }
-
-            public Builder withInsets(Rect insets) {
-                this.insets = insets;
-                return this;
-            }
-
-            public DrawableRepresentation build() {
-                DrawableRepresentation representation = new DrawableRepresentation(this);
-                return representation;
-            }
-        }
-
+        //TODO READ DRAWABLES LIST TO ADD HERE FROM ATTRS
     }
 
 
-    private Rect mTotalDrawableInsets;
-    private ArrayList<DrawableRepresentation> mDrawables;
-
-
-    public void addDrawable(Drawable drawable, Rect insets, int zOrder) {
+    public DrawableRepresentation addDrawable(Drawable drawable, Rect insets, int zOrder) {
         if (insets == null) {
-            insets = sRectZero;
+            insets = EMPTY_RECT;
         }
         DrawableRepresentation representation = new DrawableRepresentation.Builder()
                 .withDrawable(drawable)
@@ -110,17 +57,20 @@ public class DrawableManager extends ViewExtension<View> {
         }
         mDrawables.add(idx, representation);
         if (computeInsets()) {
-            invalidateViewPadding();
+            mView.requestLayout();
         }
+        drawable.setCallback(mView);
+        return representation;
     }
 
-    private void invalidateViewPadding() {
-        //mView.setPadding(mTotalDrawableInsets.left, mTotalDrawableInsets.top, mTotalDrawableInsets.right, mTotalDrawableInsets.bottom);
+    public void removeDrawable(DrawableRepresentation drawable) {
+        mDrawables.remove(drawable);
     }
+
 
     @Override
-    public int getFlag() {
-        return 0;
+    public Extension getExtensionId() {
+        return Extension.DRAWABLE_EXTENSION;
     }
 
     /**
@@ -134,7 +84,6 @@ public class DrawableManager extends ViewExtension<View> {
     /**
      * @return true if the insets changed
      */
-
     private boolean computeInsets() {
         int left = 0;
         int right = 0;
@@ -164,5 +113,46 @@ public class DrawableManager extends ViewExtension<View> {
             mTotalDrawableInsets.set(left, top, right, bottom);
         }
         return changed;
+    }
+
+
+    @Override
+    public void onPreDraw(Canvas canvas) {
+        super.onPreDraw(canvas);
+        for (DrawableRepresentation representation : mDrawables) {
+            if (representation.getZOrder() < Z_ORDER_VIEW_DRAWING) {
+                representation.getDrawable().setBounds(0, 0, mView.getWidth(), mView.getHeight());
+                representation.getDrawable().draw(canvas);
+            }
+        }
+    }
+
+    @Override
+    public void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        for (DrawableRepresentation representation : mDrawables) {
+            if (representation.getZOrder() > Z_ORDER_VIEW_DRAWING) {
+                representation.getDrawable().setBounds(0, 0, mView.getWidth(), mView.getHeight());
+                representation.getDrawable().draw(canvas);
+            }
+        }
+    }
+
+    @Override
+    public void onSizeChanged(int width, int height) {
+        super.onSizeChanged(width, height);
+        for (DrawableRepresentation representation : mDrawables) {
+            if (representation.getZOrder() > Z_ORDER_VIEW_DRAWING) {
+                representation.getDrawable().setBounds(0, 0, width, height);
+            }
+        }
+    }
+
+    @Override
+    public void drawableStateChanged() {
+        super.drawableStateChanged();
+        for (DrawableRepresentation representation : mDrawables) {
+            representation.getDrawable().setState(mView.getDrawableState());
+        }
     }
 }

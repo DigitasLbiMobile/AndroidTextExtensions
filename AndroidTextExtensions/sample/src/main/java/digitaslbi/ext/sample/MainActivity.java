@@ -14,11 +14,13 @@ package digitaslbi.ext.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+
 import digitaslbi.ext.TextView;
-import digitaslbi.ext.fonts.Chewy;
-import digitaslbi.ext.fonts.ComingSoon;
+import digitaslbi.ext.drawables.MultiDrawablesExtension;
 import digitaslbi.ext.fonts.PermanentMarker;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,10 +29,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         TextView textView = (TextView) findViewById(R.id.textView5);
+        textView.setFocusable(true);
+        textView.setFocusableInTouchMode(true);
+        textView.setClickable(true);
         textView.setFont(PermanentMarker.PermanentMarker);
-
+        textView.addDrawable(getResources().getDrawable(R.drawable.test_selector), MultiDrawablesExtension.EMPTY_RECT, 0);
     }
 
     @Override

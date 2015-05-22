@@ -13,7 +13,23 @@
 package digitaslbi.ext;
 
 /**
- * Created by vrabiee on 13/05/15.
+ * Created by anatriep on 21/05/2015.
  */
-public class BorderExtension {
+public abstract class Extension {
+
+    public final static Extension FONT_EXTENSION = new Extension() {
+        @Override
+        public int getId() {
+            return 0x01;
+        }
+    };
+    public final static Extension DRAWABLE_EXTENSION = new Extension() {
+        @Override
+        public int getId() {
+            return 0x02;
+        }
+    };
+
+    public abstract int getId();
+
 }
