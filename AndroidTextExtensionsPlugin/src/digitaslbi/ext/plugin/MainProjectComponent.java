@@ -96,4 +96,6 @@ public class MainProjectComponent extends AbstractProjectComponent {
             thread.setContextClassLoader(loader);
         }
     }
+
+
 }
