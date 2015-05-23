@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="digitaslbi.ext.plugin.SettingsDialog">
+  <grid id="cbd77" binding="contentPane" layout-manager="GridBagLayout">
+    <constraints>
+      <xy x="48" y="54" width="600" height="400"/>
+    </constraints>
+    <properties>
+      <maximumSize width="1000" height="500"/>
+      <minimumSize width="500" height="250"/>
+      <name value=""/>
+      <opaque value="false"/>
+      <preferredSize width="500" height="250"/>
+    </properties>
+    <border type="etched">
+      <font/>
+      <title-color color="-16777216"/>
+    </border>
+    <children>
+      <component id="fc29b" class="javax.swing.JLabel" binding="descriptionLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag top="5" left="10" bottom="10" right="10" weightx="1.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="digitaslbi/ext/plugin/labels" key="descriptionLabel"/>
+        </properties>
+      </component>
+      <grid id="b4350" layout-manager="GridBagLayout">
+        <constraints>
+          <grid row="1" column="0" row-span="2" col-span="2" vsize-policy="3" hsize-policy="3" anchor="2" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="1.0"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="ccb3d" class="javax.swing.JCheckBox" binding="automaticallyGenerateFilesFromAssetsCheckBox">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="5" bottom="5" right="5" weightx="1.0" weighty="1.0"/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text resource-bundle="digitaslbi/ext/plugin/labels" key="automaticallyManageAssetsCheckBox"/>
+            </properties>
+          </component>
+          <component id="51050" class="javax.swing.JCheckBox" binding="useDefaultPackageCheckBox">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="5" bottom="5" right="5" weightx="1.0" weighty="1.0"/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text resource-bundle="digitaslbi/ext/plugin/labels" key="useDefaultPackageNameCheckBox"/>
+            </properties>
+          </component>
+          <component id="3e701" class="javax.swing.JTextField" binding="packageNameTextField">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+              <gridbag top="5" left="10" bottom="5" right="10" weightx="1.0" weighty="1.0"/>
+            </constraints>
+            <properties>
+              <editable value="true"/>
+              <enabled value="false"/>
+              <margin top="0" left="0" bottom="0" right="0"/>
+            </properties>
+          </component>
+          <component id="fb931" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="0" left="12" bottom="0" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <labelFor value="3e701"/>
+              <text resource-bundle="digitaslbi/ext/plugin/labels" key="packageNameLabel"/>
+            </properties>
+          </component>
+          <component id="6ef7b" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <gridbag top="10" left="10" bottom="10" right="0" weightx="0.0" weighty="0.0"/>
+            </constraints>
+            <properties>
+              <font swing-font="OptionPane.font"/>
+              <text resource-bundle="digitaslbi/ext/plugin/labels" key="optionsLabel"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <vspacer id="7e144">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+      </vspacer>
+    </children>
+  </grid>
+</form>

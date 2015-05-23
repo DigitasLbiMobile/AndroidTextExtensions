@@ -29,5 +29,7 @@ public interface Constants {
 
     String GENERATED_PACKAGE_NAME = "digitaslbi.ext.fonts";
 
+    String FONTS_PACKAGE = "fonts";
+
     String BOOTSTRAP_CLASS_NAME = "FontFamilies";
 }
