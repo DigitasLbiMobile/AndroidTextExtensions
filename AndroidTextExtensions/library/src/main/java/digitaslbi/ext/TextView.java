@@ -169,4 +169,18 @@ public class TextView extends android.widget.TextView {
             extension.drawableStateChanged();
         }
     }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        boolean isDrawableVerifiedForSuperclass = super.verifyDrawable(who);
+        return isDrawableVerifiedForSuperclass || verifyDrawableExt(who);
+    }
+
+    private boolean verifyDrawableExt(Drawable who) {
+        MultiDrawablesExtension<android.widget.TextView> drawablesExtension = (MultiDrawablesExtension<android.widget.TextView>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+        if(drawablesExtension!=null){
+            return  drawablesExtension.verifyDrawable(who);
+        }
+        return false;
+    }
 }

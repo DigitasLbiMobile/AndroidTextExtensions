@@ -16,6 +16,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 
 import java.util.ArrayList;
@@ -152,7 +153,17 @@ public class MultiDrawablesExtension<T extends android.view.View> extends BaseVi
     public void drawableStateChanged() {
         super.drawableStateChanged();
         for (DrawableRepresentation representation : mDrawables) {
-            representation.getDrawable().setState(mView.getDrawableState());
+            int[] state=mView.getDrawableState();
+            representation.getDrawable().setState(state);
         }
+    }
+
+    public boolean verifyDrawable(Drawable who) {
+        for (DrawableRepresentation representation : mDrawables) {
+            if(representation.getDrawable().equals(who)){
+                return true;
+            }
+        }
+        return false;
     }
 }

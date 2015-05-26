@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         textView.setFocusableInTouchMode(true);
         textView.setClickable(true);
         textView.setFont(PermanentMarker.PermanentMarker);
-        textView.addDrawable(getResources().getDrawable(R.drawable.test_selector), MultiDrawablesExtension.EMPTY_RECT, 0);
+        textView.addDrawable(getResources().getDrawable(R.drawable.example_drawable), MultiDrawablesExtension.EMPTY_RECT, 0);
     }
 
     @Override
