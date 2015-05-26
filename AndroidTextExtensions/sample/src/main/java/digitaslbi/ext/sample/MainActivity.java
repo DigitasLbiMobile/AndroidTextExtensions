@@ -12,6 +12,8 @@
 
 package digitaslbi.ext.sample;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,6 +23,7 @@ import android.view.View;
 
 import digitaslbi.ext.TextView;
 import digitaslbi.ext.drawables.MultiDrawablesExtension;
+import digitaslbi.ext.drawables.ripple.RippleDrawable;
 import digitaslbi.ext.fonts.PermanentMarker;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +37,21 @@ public class MainActivity extends AppCompatActivity {
         textView.setFocusableInTouchMode(true);
         textView.setClickable(true);
         textView.setFont(PermanentMarker.PermanentMarker);
+        textView.setPadding(0,200,0,200);
         textView.addDrawable(getResources().getDrawable(R.drawable.example_drawable), MultiDrawablesExtension.EMPTY_RECT, 0);
+
+        int[][] states = new int[][] {
+                new int[] { android.R.attr.state_enabled}, // enabled
+                new int[] { android.R.attr.state_pressed}  // pressed
+        };
+
+        int[] colors = new int[] {
+                Color.argb(150,0,255,0),
+                Color.argb(150,0,0,255)
+        };
+
+        ColorStateList colorStateList = new ColorStateList(states, colors);
+        textView.addDrawable(new RippleDrawable(colorStateList), MultiDrawablesExtension.EMPTY_RECT, 1);
     }
 
     @Override

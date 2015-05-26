@@ -16,13 +16,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 
 import digitaslbi.ext.BaseViewExtension;
 import digitaslbi.ext.Extension;
+import digitaslbi.ext.drawables.ripple.RippleDrawable;
 
 /**
  * Created by anatriep on 21/05/2015.
@@ -150,17 +152,29 @@ public class MultiDrawablesExtension<T extends android.view.View> extends BaseVi
     }
 
     @Override
+    public void onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        for (DrawableRepresentation representation : mDrawables) {
+            if (representation.getDrawable() instanceof RippleDrawable) {
+                Log.e("X", "" + event.getX());
+                Log.e("Y", "" + event.getY());
+                ((RippleDrawable) representation.getDrawable()).setHotspotExt(event.getX(), event.getY());
+            }
+        }
+    }
+
+    @Override
     public void drawableStateChanged() {
         super.drawableStateChanged();
         for (DrawableRepresentation representation : mDrawables) {
-            int[] state=mView.getDrawableState();
+            int[] state = mView.getDrawableState();
             representation.getDrawable().setState(state);
         }
     }
 
     public boolean verifyDrawable(Drawable who) {
         for (DrawableRepresentation representation : mDrawables) {
-            if(representation.getDrawable().equals(who)){
+            if (representation.getDrawable().equals(who)) {
                 return true;
             }
         }
