@@ -16,21 +16,17 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import digitaslbi.ext.generator.FileProcessor;
 import digitaslbi.ext.generator.FontFamilyStyleGenerator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 import static com.google.common.io.Resources.getResource;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * Created by evelina on 14/05/15.
@@ -38,39 +34,35 @@ import static org.mockito.Mockito.mock;
 @RunWith(JUnit4.class)
 public class FontFamilyStyleGeneratorTest {
 
-    FileProcessor processor;
     FontFamilyStyleGenerator generator;
-    StringBuilder result;
 
     @Before
     public void setup() throws TransformerConfigurationException {
-        processor = mock(FileProcessor.class);
-        generator = new FontFamilyStyleGenerator();
-        result = new StringBuilder();
+        generator = new FontFamilyStyleGenerator.Builder().build();
     }
 
     @Test
-    public void testGenerateFontFamilyWithMultipleFonts() throws ParserConfigurationException, TransformerException, IOException {
+    public void testGenerateFontFamilyWithMultipleFonts() throws Exception {
         FontFamily family = new FontFamily("NotoSerif",
                 new Font("NotoSerif.Bold", "fonts/Noto_Serif/NotoSerif-Bold.ttf"),
                 new Font("NotoSerif.BoldItalic", "fonts/Noto_Serif/NotoSerif-BoldItalic.ttf"),
                 new Font("NotoSerif.Italic", "fonts/Noto_Serif/NotoSerif-Italic.ttf"),
                 new Font("NotoSerif.Regular", "fonts/Noto_Serif/NotoSerif-Regular.ttf"));
 
-        generator.generate(family, result);
+        SimpleImmutableEntry<String, String> result = generator.generate(family);
 
         String expected = Resources.toString(getResource("NotoSerif.xml"), Charsets.UTF_8);
-        assertEquals(expected, result.toString());
+        assertEquals(expected, result.getValue());
     }
 
     @Test
     public void testGenerateFontFamilyWithSingleFont() throws Exception {
         FontFamily family = new FontFamily("ComingSoon", new Font("ComingSoon", "fonts/Coming_Soon/ComingSoon.ttf"));
 
-        generator.generate(family, result);
+        SimpleImmutableEntry<String, String> result = generator.generate(family);
 
         String expected = Resources.toString(getResource("ComingSoon.xml"), Charsets.UTF_8);
-        assertEquals(expected, result.toString());
+        assertEquals(expected, result.getValue());
     }
 
 }
