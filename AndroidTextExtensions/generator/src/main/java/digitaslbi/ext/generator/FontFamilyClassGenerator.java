@@ -12,18 +12,20 @@
 
 package digitaslbi.ext.generator;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
-import java.io.*;
+import java.io.StringWriter;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 
 import static com.google.common.collect.Iterables.transform;
-import static digitaslbi.ext.generator.Streams.asByteSink;
+import static digitaslbi.ext.common.Constants.BOOTSTRAP_CLASS_NAME;
 
 
 /**
@@ -32,52 +34,69 @@ import static digitaslbi.ext.generator.Streams.asByteSink;
 public class FontFamilyClassGenerator implements CodeGenerator {
 
     protected final String packageName;
-    protected final Template template;
-    protected final VelocityContext vc;
+    protected final TemplateEngine templateEngine;
 
-    public FontFamilyClassGenerator(String packageName, Template template, VelocityContext vc) {
-        this.packageName = packageName;
-        this.template = template;
-        this.vc = vc;
+    private FontFamilyClassGenerator(Builder builder) {
+        this.packageName = builder.packageName;
+        this.templateEngine = builder.templateEngine;
+    }
+
+    public static class Builder extends AbstractBuilder<FontFamilyClassGenerator, Builder> {
+        @Override
+        public Builder self() {
+            return this;
+        }
+
+        @Override
+        public FontFamilyClassGenerator build() {
+            return new FontFamilyClassGenerator(this);
+        }
     }
 
     @Override
-    public void generate(FontFamily fontFamily, File outputDir) throws IOException {
-        final File dir = new File(outputDir, packageName.replaceAll("\\.", File.separator));
-        dir.mkdirs();
-        final BufferedWriter bw = new BufferedWriter(new FileWriter(new File(dir, fontFamily.getName() + FileType.JAVA.getExtension())));
-        bw.write(generate(fontFamily).toString());
-        bw.close();
+    public List<SimpleImmutableEntry<String, String>> generate(List<FontFamily> fontFamilies) {
+        return FluentIterable.from(fontFamilies).transform(new Function<FontFamily, SimpleImmutableEntry<String, String>>() {
+            @Override public SimpleImmutableEntry<String, String> apply(FontFamily input) {
+                return generate(input);
+            }
+        }).filter(new Predicate<SimpleImmutableEntry<String, String>>() {
+            @Override public boolean apply(SimpleImmutableEntry<String, String> input) {
+                return input != null;
+            }
+        }).append(generateBootstrap(fontFamilies)).toList();
+
+    }
+
+    private SimpleImmutableEntry<String, String> generateBootstrap(List<FontFamily> fontFamilies) {
+        final VelocityContext vc = templateEngine.getVelocityContext();
+        vc.internalPut("packageName", packageName);
+        vc.internalPut("className", BOOTSTRAP_CLASS_NAME);
+        vc.internalPut("fontFamilies", Joiner.on(",").join(transform(fontFamilies, new Function<FontFamily, String>() {
+            @Override public String apply(FontFamily input) {
+                return "new " + input.getName() + "()";
+            }
+        })));
+
+        final StringWriter writer = new StringWriter();
+        templateEngine.getBootstrapClassTemplate().merge(vc, writer);
+        return new SimpleImmutableEntry<String, String>(BOOTSTRAP_CLASS_NAME + ".java", writer.toString());
     }
 
     @Override
-    public void generate(FontFamily fontFamily, Appendable appendable) throws IOException {
-        appendable.append(generate(fontFamily).toString());
-    }
-
-    @Override
-    public void generate(FontFamily fontFamily, final OutputStream outputStream) throws Exception {
-        final StringBuilder appendable = new StringBuilder();
-        generate(fontFamily, appendable);
-        asByteSink(outputStream).asCharSink(Charsets.UTF_8).openStream().write(appendable.toString());
-    }
-
-    private StringWriter generate(FontFamily fontFamily) {
+    public SimpleImmutableEntry<String, String> generate(FontFamily fontFamily) {
+        final VelocityContext vc = templateEngine.getVelocityContext();
         vc.internalPut("packageName", packageName);
         vc.internalPut("className", fontFamily.getName());
         vc.internalPut("fontFamily", fontFamily);
-        vc.internalPut("params", params(fontFamily));
-        final StringWriter writer = new StringWriter();
-        template.merge(vc, writer);
-        return writer;
-    }
-
-    private String params(FontFamily fontFamily) {
-        return Joiner.on(",").join(transform(fontFamily.getFonts(), new Function<Font, String>() {
+        vc.internalPut("params", Joiner.on(",").join(transform(fontFamily.getFonts(), new Function<Font, String>() {
             @Override
             public String apply(Font input) {
                 return input.getFieldName();
             }
-        }));
+        })));
+
+        final StringWriter writer = new StringWriter();
+        templateEngine.getClassTemplate().merge(vc, writer);
+        return new SimpleImmutableEntry<String, String>(fontFamily.getName() + ".java", writer.toString());
     }
 }

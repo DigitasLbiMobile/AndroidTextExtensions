@@ -32,7 +32,7 @@ import java.util.*;
 import static android.text.TextUtils.isEmpty;
 import static com.google.common.collect.FluentIterable.from;
 import static digitaslbi.ext.common.Constants.BOOTSTRAP_CLASS_NAME;
-import static digitaslbi.ext.common.Constants.GENERATED_PACKAGE_NAME;
+import static digitaslbi.ext.common.Constants.BOOTSTRAP_PACKAGE_NAME;
 
 
 /**
@@ -65,7 +65,7 @@ public class FontManager {
 
     private static void bootstrapFontFamilies() {
         try {
-            Class<?> bootstrapClass = Class.forName(GENERATED_PACKAGE_NAME + "." + BOOTSTRAP_CLASS_NAME);
+            Class<?> bootstrapClass = Class.forName(BOOTSTRAP_PACKAGE_NAME + "." + BOOTSTRAP_CLASS_NAME);
             Method init = bootstrapClass.getDeclaredMethod("init");
             init.invoke(bootstrapClass);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

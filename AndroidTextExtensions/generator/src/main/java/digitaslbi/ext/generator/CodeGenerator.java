@@ -14,31 +14,34 @@ package digitaslbi.ext.generator;
 
 import digitaslbi.ext.common.FontFamily;
 
-import java.io.File;
-import java.io.OutputStream;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 
 /**
  * Represents a code generator interface.
  */
 public interface CodeGenerator {
 
-    enum FileType {
-        XML(".xml"), JAVA(".java");
+    SimpleImmutableEntry<String, String> generate(FontFamily fontFamily);
 
-        String extension;
+    List<SimpleImmutableEntry<String, String>> generate(List<FontFamily> fontFamilies);
 
-        FileType(String extension) {
-            this.extension = extension;
+    abstract class AbstractBuilder<T, B extends AbstractBuilder<T, B>> {
+        protected String packageName;
+        protected TemplateEngine templateEngine;
+
+        public abstract B self();
+
+        public abstract T build();
+
+        public B withPackageName(String packageName) {
+            this.packageName = packageName;
+            return self();
         }
 
-        public String getExtension() {
-            return extension;
+        public B withTemplateEngine(TemplateEngine templateEngine) {
+            this.templateEngine = templateEngine;
+            return self();
         }
     }
-
-    void generate(FontFamily fontFamily, File outputDir) throws Exception;
-
-    void generate(FontFamily fontFamily, OutputStream outputStream) throws Exception;
-
-    void generate(FontFamily fontFamily, Appendable appendable) throws Exception;
 }

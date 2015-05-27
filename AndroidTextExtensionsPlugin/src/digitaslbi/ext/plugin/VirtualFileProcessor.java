@@ -12,53 +12,70 @@
 
 package digitaslbi.ext.plugin;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectRootManager;
+import com.google.common.io.Files;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
-import com.intellij.util.Processor;
+import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import digitaslbi.ext.generator.BootstrapClassGenerator;
-import digitaslbi.ext.generator.CodeGenerator;
-import digitaslbi.ext.generator.CodeGenerator.FileType;
 import digitaslbi.ext.generator.FileProcessor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static digitaslbi.ext.common.Constants.ASSETS_FOLDER;
-import static digitaslbi.ext.plugin.CommandHelper.runReadCommand;
-import static java.lang.String.format;
+import static com.google.common.base.CharMatcher.anyOf;
+import static com.google.common.collect.FluentIterable.from;
+import static digitaslbi.ext.common.Font.ASSET_FILE_SEPARATORS;
+import static digitaslbi.ext.common.Font.NAME_PARTS_COUNT;
+import static digitaslbi.ext.common.FontFamily.capitalize;
 
 /**
- * Created by vrabiee on 18/05/15.
+ * @author Evelina Vrabie on 27/05/15.
  */
-public abstract class VirtualFileProcessor extends FileProcessor {
+public class VirtualFileProcessor {
 
-    public static final String ASSETS_PACKAGE = "src/main/assets";
+    private final FileProcessor fileProcessor;
 
-    protected final Project project;
-    protected final VirtualFile assetsFolder;
-
-    public VirtualFileProcessor(CodeGenerator generator, BootstrapClassGenerator bootstrapClassGenerator, Project project) {
-        super(generator, bootstrapClassGenerator);
-        this.project = project;
-        this.assetsFolder = findAssetsFolder(project);
+    public VirtualFileProcessor() {
+        fileProcessor = new FileProcessor.Builder().build();
     }
 
-    public VirtualFileProcessor(CodeGenerator generator, Project project) {
-        super(generator);
-        this.project = project;
-        this.assetsFolder = findAssetsFolder(project);
+    public List<FontFamily> process(VirtualFile inputDir) {
+        final Map<String, FontFamily> map = new HashMap<String, FontFamily>();
+
+        final List<VirtualFile> files = from(VfsUtil.collectChildrenRecursively(inputDir))
+                .filter(new Predicate<VirtualFile>() {
+                    @Override public boolean apply(VirtualFile input) {
+                        return isValidFontFile(input);
+                    }
+                }).toList();
+
+
+        for (VirtualFile file : files) {
+            final String fileName = fileNameWithRelativePath(inputDir, file);
+            final String nameWithoutExtension = Files.getNameWithoutExtension(fileName);
+            final String fontFamilyName = getFontFamilyName(nameWithoutExtension);
+            final Font font = new Font(nameWithoutExtension, fileName);
+
+            if (map.containsKey(fontFamilyName)) {
+                map.get(fontFamilyName).addFont(font);
+            } else {
+                map.put(fontFamilyName, new FontFamily(fontFamilyName, font));
+            }
+        }
+
+        return ImmutableList.copyOf(map.values());
     }
 
-    public abstract void generate(final VirtualFile input) throws Exception;
-
-    private void collectFiles(final VirtualFile input, final Collection<VirtualFile> files) {
+    protected void collectFiles(final VirtualFile input, final Collection<VirtualFile> files) {
         if (input.isDirectory()) {
             VfsUtilCore.visitChildrenRecursively(input, new VirtualFileVisitor(VirtualFileVisitor.SKIP_ROOT) {
                 @Override
@@ -74,68 +91,24 @@ public abstract class VirtualFileProcessor extends FileProcessor {
         }
     }
 
-    protected List<FontFamily> process(final VirtualFile input) {
-        if (assetsFolder == null) {
-            Log.e(getClass(), "Can't find the '%s' folder", ASSETS_FOLDER);
-            Dialogs.showFolderNotFoundDialog(ASSETS_FOLDER, project);
-            return Collections.emptyList();
-        }
-
-        final HashMap<String, FontFamily> map = new HashMap<String, FontFamily>();
-        final Collection<VirtualFile> files = new ArrayList<VirtualFile>();
-        collectFiles(input, files);
-
-        for (final VirtualFile file : files) {
-            runReadCommand(project, new Runnable() {
-                @Override
-                public void run() {
-                    process(fileNameWithRelativePath(assetsFolder, file), map);
-                }
-            });
-        }
-
-        return ImmutableList.copyOf(map.values());
+    public boolean isValidFontFile(VirtualFile file) {
+        return file.getFileType().isBinary() && fileProcessor.isValidFontExtension(file.getName());
     }
 
-    public static String fileNameWithRelativePath(VirtualFile parentDir, VirtualFile file) {
-        String path = file.getPath().replace(parentDir.getPath(), "");
+    protected String getFontFamilyName(String fileName) {
+        final String assetName = Files.getNameWithoutExtension(fileName);
+        return capitalize(Splitter.on(anyOf(ASSET_FILE_SEPARATORS))
+                .trimResults()
+                .omitEmptyStrings()
+                .limit(NAME_PARTS_COUNT)
+                .split(assetName).iterator().next());
+    }
+
+    protected String fileNameWithRelativePath(VirtualFile parentDir, VirtualFile file) {
+        final String path = file.getPath().replace(parentDir.getPath(), "");
         if (path.startsWith(File.separator)) {
             return path.substring(1);
         }
         return path;
-    }
-
-    public static boolean isValidFontFile(VirtualFile file) {
-        return file.getFileType().isBinary() && isValidFontExtension(file.getName());
-    }
-
-    public void delete(final String fileName, final Project project) {
-        Log.d(getClass(), "Deleting %s.", fileName);
-
-        VfsUtilCore.processFilesRecursively(project.getBaseDir(), new Processor<VirtualFile>() {
-            @Override public boolean process(VirtualFile file) {
-                if (file.getName().equals(fileName)) {
-                    try {
-                        file.delete(null);
-                    } catch (IOException e) {
-                        Log.e(getClass(), e, "Failed to delete file %s.", file);
-                        Dialogs.showErrorDialog(format("Failed to delete file %s:\n%s", file, e.getMessage()), project);
-                    }
-                    return false;
-                }
-                return true;
-            }
-        });
-    }
-
-
-    public static VirtualFile findAssetsFolder(Project project) {
-        final VirtualFile[] sourceRoots = ProjectRootManager.getInstance(project).getContentSourceRoots();
-        for (VirtualFile file : sourceRoots) {
-            if (file.getPath().endsWith(ASSETS_PACKAGE)) {
-                return file;
-            }
-        }
-        return null;
     }
 }
