@@ -20,16 +20,22 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.widget.*;
 
 import java.util.Collection;
 
+import digitaslbi.ext.common.Font;
 import digitaslbi.ext.drawables.DrawableRepresentation;
 import digitaslbi.ext.drawables.MultiDrawablesExtension;
+import digitaslbi.ext.font.FontExtension;
 
 /**
  * Created by anatriep on 21/05/2015.
  */
 public class View extends android.view.View {
+
+    public static final int DEFAULT_STYLE_ATTR = android.R.attr.textViewStyle;
 
     protected ExtensionsManager<android.view.View> mExtensions = new ExtensionsManager<>();
 
@@ -57,8 +63,7 @@ public class View extends android.view.View {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        updateIntrinsicPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
-        mExtensions.init(context, attrs, defStyleAttr, defStyleRes, 0, this);
+        mExtensions.init(context, attrs, defStyleAttr, defStyleRes, DEFAULT_STYLE_ATTR, this);
     }
 
     public Collection<ViewExtension<android.view.View>> getExtensions() {
@@ -155,5 +160,27 @@ public class View extends android.view.View {
         for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
             extension.drawableStateChanged();
         }
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        boolean isDrawableVerifiedForSuperclass = super.verifyDrawable(who);
+        return isDrawableVerifiedForSuperclass || verifyDrawableExt(who);
+    }
+
+    private boolean verifyDrawableExt(Drawable who) {
+        MultiDrawablesExtension<android.view.View> drawablesExtension = (MultiDrawablesExtension<android.view.View>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+        if (drawablesExtension != null) {
+            return drawablesExtension.verifyDrawable(who);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
+            extension.onTouchEvent(event);
+        }
+        return super.onTouchEvent(event);
     }
 }

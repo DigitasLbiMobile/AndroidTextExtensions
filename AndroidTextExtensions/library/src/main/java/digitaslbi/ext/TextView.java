@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import java.util.Collection;
 
@@ -168,5 +169,27 @@ public class TextView extends android.widget.TextView {
         for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
             extension.drawableStateChanged();
         }
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        boolean isDrawableVerifiedForSuperclass = super.verifyDrawable(who);
+        return isDrawableVerifiedForSuperclass || verifyDrawableExt(who);
+    }
+
+    private boolean verifyDrawableExt(Drawable who) {
+        MultiDrawablesExtension<android.widget.TextView> drawablesExtension = (MultiDrawablesExtension<android.widget.TextView>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+        if (drawablesExtension != null) {
+            return drawablesExtension.verifyDrawable(who);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        for (ViewExtension<? extends android.view.View> extension : getExtensions()) {
+            extension.onTouchEvent(event);
+        }
+        return super.onTouchEvent(event);
     }
 }
