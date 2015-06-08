@@ -14,6 +14,8 @@ package digitaslbi.ext.plugin;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import digitaslbi.ext.plugin.utils.Dialogs;
+import digitaslbi.ext.plugin.utils.Log;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -24,7 +26,7 @@ import java.util.ResourceBundle;
 public class SettingsDialog extends DialogWrapper {
 
     private final Project project;
-    private final String packageName;
+    private final AndroidTextExtensionsPlugin plugin;
 
     private JPanel contentPane;
     private JCheckBox automaticallyGenerateFilesFromAssetsCheckBox;
@@ -32,20 +34,19 @@ public class SettingsDialog extends DialogWrapper {
     private JTextField packageNameTextField;
     private JLabel descriptionLabel;
 
-    public SettingsDialog(Project project, boolean canBeParent, boolean modal, String packageName) {
-        super(project, canBeParent);
-        this.project = project;
-        this.packageName = packageName;
+    public SettingsDialog(AndroidTextExtensionsPlugin plugin) {
+        super(plugin.getProject(), true);
+        this.plugin = plugin;
+        this.project = plugin.getProject();
         init();
-        setModal(modal);
+        setModal(true);
         setTitle(ResourceBundle.getBundle("digitaslbi.ext.plugin.labels").getString("title"));
     }
 
     @Override protected void init() {
         super.init();
-        if (packageName != null && !packageName.isEmpty()) {
-            packageNameTextField.setText(packageName);
-        }
+        packageNameTextField.setText(AndroidTextExtensionsPlugin.GENERATED_PACKAGE_NAME);
+
         useDefaultPackageCheckBox.addItemListener(new ItemListener() {
             @Override public void itemStateChanged(ItemEvent itemEvent) {
                 if (itemEvent.getStateChange() == ItemEvent.DESELECTED) {
@@ -56,10 +57,16 @@ public class SettingsDialog extends DialogWrapper {
                 }
             }
         });
-    }
 
-    public SettingsDialog(Project project, String packageName) {
-        this(project, true, true, packageName);
+        try {
+            boolean hasLibraryDependency = plugin.detectLibraryDependency();
+            if (!hasLibraryDependency) {
+
+            }
+
+        } catch (PluginException e) {
+            Log.e(getClass(), e, "Can't check for library dependency.");
+        }
     }
 
     @Nullable @Override
@@ -68,6 +75,12 @@ public class SettingsDialog extends DialogWrapper {
     }
 
     @Override protected void doOKAction() {
+        try {
+            plugin.generate();
+        } catch (PluginException e) {
+            Dialogs.showError(project, e.getMessage());
+            Log.e(getClass(), e.getMessage());
+        }
         super.doOKAction();
     }
 
@@ -82,14 +95,5 @@ public class SettingsDialog extends DialogWrapper {
 
     @Nullable @Override public JComponent getPreferredFocusedComponent() {
         return automaticallyGenerateFilesFromAssetsCheckBox;
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override public void run() {
-                SettingsDialog dialog = new SettingsDialog(null, true, true, "digitaslbi.font.ext");
-                dialog.show();
-            }
-        });
     }
 }

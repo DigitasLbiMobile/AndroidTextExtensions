@@ -22,7 +22,7 @@
           <gridbag top="5" left="10" bottom="10" right="10" weightx="1.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text resource-bundle="digitaslbi/ext/plugin/labels" key="descriptionLabel"/>
+          <text resource-bundle="digitaslbi/ext/plugin/strings" key="descriptionLabel"/>
         </properties>
       </component>
       <grid id="b4350" layout-manager="GridBagLayout">
@@ -40,7 +40,7 @@
             </constraints>
             <properties>
               <selected value="true"/>
-              <text resource-bundle="digitaslbi/ext/plugin/labels" key="automaticallyManageAssetsCheckBox"/>
+              <text resource-bundle="digitaslbi/ext/plugin/strings" key="automaticallyManageAssetsCheckBox"/>
             </properties>
           </component>
           <component id="51050" class="javax.swing.JCheckBox" binding="useDefaultPackageCheckBox">
@@ -50,7 +50,7 @@
             </constraints>
             <properties>
               <selected value="true"/>
-              <text resource-bundle="digitaslbi/ext/plugin/labels" key="useDefaultPackageNameCheckBox"/>
+              <text resource-bundle="digitaslbi/ext/plugin/strings" key="useDefaultPackageNameCheckBox"/>
             </properties>
           </component>
           <component id="3e701" class="javax.swing.JTextField" binding="packageNameTextField">
@@ -73,7 +73,7 @@
             </constraints>
             <properties>
               <labelFor value="3e701"/>
-              <text resource-bundle="digitaslbi/ext/plugin/labels" key="packageNameLabel"/>
+              <text resource-bundle="digitaslbi/ext/plugin/strings" key="packageNameLabel"/>
             </properties>
           </component>
           <component id="6ef7b" class="javax.swing.JLabel">
@@ -83,7 +83,7 @@
             </constraints>
             <properties>
               <font swing-font="OptionPane.font"/>
-              <text resource-bundle="digitaslbi/ext/plugin/labels" key="optionsLabel"/>
+              <text resource-bundle="digitaslbi/ext/plugin/strings" key="optionsLabel"/>
             </properties>
           </component>
         </children>

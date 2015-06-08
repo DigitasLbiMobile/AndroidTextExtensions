@@ -21,6 +21,7 @@ public final class Log {
 
     private static final boolean DEBUG = true;
 
+
     public static void d(Class<?> caller, String msg, Object... args) {
         if (DEBUG) {
             String formattedMsg = String.format(msg, args);

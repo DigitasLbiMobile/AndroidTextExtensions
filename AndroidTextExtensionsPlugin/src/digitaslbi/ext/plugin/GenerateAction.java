@@ -16,7 +16,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import digitaslbi.ext.plugin.models.AndroidProject;
 import digitaslbi.ext.plugin.utils.Dialogs;
 import digitaslbi.ext.plugin.utils.Log;
 
@@ -31,20 +30,20 @@ public class GenerateAction extends AnAction {
     public void actionPerformed(AnActionEvent actionEvent) {
         final Project project = actionEvent.getProject();
         if (project == null) {
-            Log.e(getClass(), "This plugin can only work on an Android Studio/IntelliJ Android project.\n" +
-                    "[No project found]");
+            Log.e(getClass(), "The selected project is null.");
             return;
         }
 
         final VirtualFile selectedFile = actionEvent.getData(VIRTUAL_FILE);
         if (selectedFile == null) {
-            Dialogs.showErrorDialog("Please select the module inside your Android Studio/IntelliJ Android project " +
-                    "for which you want to generate the files.\n[No Android module selected]", project);
+            Dialogs.showError(project, "Select an app or library module inside your Android project.");
             return;
         }
 
-        //new SettingsDialog(project, androidProject).show();
-        final AndroidProject androidProject = new AndroidProject(project, selectedFile);
-        androidProject.generate();
+        try {
+            new SettingsDialog(new AndroidTextExtensionsPlugin(project, selectedFile)).show();
+        } catch (PluginException e) {
+            Dialogs.showError(project, e.getMessage());
+        }
     }
 }
