@@ -16,23 +16,10 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import digitaslbi.ext.common.Constants;
-import digitaslbi.ext.generator.BootstrapClassGenerator;
-import digitaslbi.ext.generator.FontFamilyClassGenerator;
-import digitaslbi.ext.generator.FontFamilyStyleGenerator;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.jetbrains.android.facet.AndroidFacet;
-import org.jetbrains.android.sdk.AndroidSdkUtils;
-import org.jetbrains.android.util.AndroidUtils;
-
-import java.util.List;
+import digitaslbi.ext.plugin.utils.Dialogs;
+import digitaslbi.ext.plugin.utils.Log;
 
 import static com.intellij.openapi.actionSystem.DataKeys.VIRTUAL_FILE;
-import static digitaslbi.ext.common.Constants.ASSETS_FOLDER;
-import static digitaslbi.ext.common.Constants.GENERATED_PACKAGE_NAME;
-import static digitaslbi.ext.plugin.MainProjectComponent.initVelocity;
 
 /**
  * Created by evelina on 14/05/15.
@@ -43,42 +30,20 @@ public class GenerateAction extends AnAction {
     public void actionPerformed(AnActionEvent actionEvent) {
         final Project project = actionEvent.getProject();
         if (project == null) {
+            Log.e(getClass(), "The selected project is null.");
             return;
         }
 
-        List<AndroidFacet> facets = AndroidUtils.getApplicationFacets(project);
-        if(facets.isEmpty()) {
-            Log.d(getClass(), "Not an Android project. Skipping.");
+        final VirtualFile selectedFile = actionEvent.getData(VIRTUAL_FILE);
+        if (selectedFile == null) {
+            Dialogs.showError(project, "Select an app or library module inside your Android project.");
             return;
         }
 
-        final VelocityEngine ve = initVelocity(getClass());
-        final VelocityContext vc = new VelocityContext();
-
-        final Template classTemplate = ve.getTemplate("FontFamily.java.vm");
-        final Template bootstrapTemplate = ve.getTemplate("FontFamilies.java.vm");
-
-        final FontFamilyClassGenerator classGenerator = new FontFamilyClassGenerator(GENERATED_PACKAGE_NAME, classTemplate, vc);
-        final BootstrapClassGenerator bootstrapClassGenerator = new BootstrapClassGenerator(GENERATED_PACKAGE_NAME, bootstrapTemplate, vc);
-
-        final VirtualFile selectedFile = VIRTUAL_FILE.getData(actionEvent.getDataContext());
-        if (isAssetsFolder(selectedFile)) {
-            try {
-                new FontFamilyClassProcessor(classGenerator, bootstrapClassGenerator, project).generate(selectedFile);
-                new FontFamilyStyleProcessor(new FontFamilyStyleGenerator(), project).generate(selectedFile);
-            } catch (Exception e) {
-                Log.e(getClass(), e, "Failed to generate files with exception.");
-                Dialogs.showErrorDialog("AndroidExtensionsPlugin failed with exception:\n" + e.getMessage(), project);
-            }
-        } else {
-            Dialogs.showErrorDialog("You need to select the '" + Constants.ASSETS_FOLDER + "' folder.", project);
+        try {
+            new SettingsDialog(new AndroidTextExtensionsPlugin(project, selectedFile)).show();
+        } catch (PluginException e) {
+            Dialogs.showError(project, e.getMessage());
         }
-    }
-
-    private boolean isAssetsFolder(VirtualFile selectedFile) {
-        return selectedFile != null &&
-                selectedFile.exists() &&
-                selectedFile.isDirectory() &&
-                selectedFile.getName().equals(ASSETS_FOLDER);
     }
 }

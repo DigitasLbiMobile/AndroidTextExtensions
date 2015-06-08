@@ -12,21 +12,26 @@
 
 package digitaslbi.ext.generator;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import digitaslbi.ext.common.FontFamily;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.util.Properties;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
+
+import static com.google.common.collect.FluentIterable.from;
+import static java.util.Arrays.asList;
 
 /**
  * The **generator** module is used by the **IdeaPlugin** to auto-generate the necessary sources and resources
  * to support the custom fonts extension.
- * <p/>
  * It can also be used as a standalone jar.
- * <p/>
  * __TODO__ add example
  */
 public class Main {
@@ -62,26 +67,48 @@ public class Main {
     }
 
     private static void processFiles(File inputDir, String outputPath, String packageName) throws Exception {
-        final File classOutputDir = new File(outputPath);
-        classOutputDir.mkdirs();
+        final File packageDir = new File(outputPath, packageName.replaceAll("\\.", File.separator));
+        packageDir.mkdirs();
 
         final File resOutputDir = new File(outputPath, RES_PATH);
         resOutputDir.mkdirs();
 
-        final VelocityEngine ve = new VelocityEngine();
-        final Properties properties = new Properties();
-        properties.setProperty("resource.loader", "file");
-        properties.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        ve.init(properties);
+        final TemplateEngine templateEngine = new TemplateEngine();
 
-        final VelocityContext vc = new VelocityContext();
-        final Template classTemplate = ve.getTemplate("FontFamily.java.vm");
-        final Template bootstrapTemplate = ve.getTemplate("FontFamilies.java.vm");
+        final FontFamilyClassGenerator classGenerator = new FontFamilyClassGenerator.Builder()
+                .withPackageName(packageName)
+                .withTemplateEngine(templateEngine)
+                .build();
 
-        final FontFamilyClassGenerator classGenerator = new FontFamilyClassGenerator(packageName, classTemplate, vc);
-        final BootstrapClassGenerator bootstrapClassGenerator = new BootstrapClassGenerator(packageName, bootstrapTemplate, vc);
+        final FontFamilyStyleGenerator styleGenerator = new FontFamilyStyleGenerator.Builder().build();
 
-        new FileProcessor(classGenerator, bootstrapClassGenerator).generate(inputDir, classOutputDir);
-        new FileProcessor(new FontFamilyStyleGenerator()).generate(inputDir, resOutputDir);
+        final List<FontFamily> fontFamilies = new FileProcessor.Builder().build().process(inputDir);
+
+        for(SimpleImmutableEntry<String, String> entry : classGenerator.generate(fontFamilies)) {
+            writeToOutputDir(entry, packageDir);
+        }
+
+        for(SimpleImmutableEntry<String, String> entry : styleGenerator.generate(fontFamilies)) {
+            writeToOutputDir(entry, resOutputDir);
+        }
+    }
+
+    private static void writeToOutputDir(SimpleImmutableEntry<String, String> result, File outputDir) {
+        BufferedWriter bw = null;
+        try {
+            bw = new BufferedWriter(new FileWriter(new File(outputDir, result.getKey())));
+            bw.write(result.getValue());
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (bw != null) {
+                try {
+                    bw.close();
+                } catch (IOException e1) {
+                    // ignore
+                }
+            }
+        }
     }
 }

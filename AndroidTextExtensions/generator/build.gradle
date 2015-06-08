@@ -47,13 +47,22 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
-task copyTestResources(type: Copy) {
-    from "${projectDir}/src/test/resources" into "${buildDir}/classes/test"
-}
-processTestResources.dependsOn copyTestResources
 
-task copyJar(type: Copy) {
-    into "../../AndroidTextExtensionsPlugin/libs"
-    from jar
+afterEvaluate {
+    task copyTestResources(type: Copy) {
+        from "${projectDir}/src/test/resources" into "${buildDir}/classes/test"
+    }
+    processTestResources.dependsOn copyTestResources
+
+    task copyJar(type: Copy) {
+        into "../../AndroidTextExtensionsPlugin/libs"
+        from jar
+    }
+    task copySourcesJar(type: Copy) {
+        into "../../AndroidTextExtensionsPlugin/libs"
+        from project.tasks['sourcesJar']
+    }
+
+    assemble.dependsOn copyJar, copySourcesJar
 }
-assemble.dependsOn copyJar
+

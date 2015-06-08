@@ -19,15 +19,11 @@ public interface Constants {
 
     String ASSETS_FOLDER = "assets";
 
-    String ASSETS_FONTS_FOLDER = "fonts/";
-
-    String[] ACCEPTED_FONTS_EXTENSIONS = {"ttf", "otf"};
-
-    String RES_FOLDER = "res";
+    String RESOURCE_FOLDER = "res";
 
     String VALUES_FOLDER = "values";
 
-    String GENERATED_PACKAGE_NAME = "digitaslbi.ext.fonts";
+    String BOOTSTRAP_PACKAGE_NAME = "digitaslbi.ext.fonts";
 
     String BOOTSTRAP_CLASS_NAME = "FontFamilies";
 }

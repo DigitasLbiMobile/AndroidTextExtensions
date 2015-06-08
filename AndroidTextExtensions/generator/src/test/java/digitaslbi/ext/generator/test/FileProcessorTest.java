@@ -14,7 +14,6 @@ package digitaslbi.ext.generator.test;
 
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import digitaslbi.ext.generator.CodeGenerator;
 import digitaslbi.ext.generator.FileProcessor;
 import org.junit.After;
 import org.junit.Before;
@@ -29,9 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by evelina on 14/05/15.
@@ -47,7 +44,6 @@ public class FileProcessorTest {
 
     File fonts;
     FileProcessor processor;
-    CodeGenerator generator;
     StringBuilder result;
 
     private void newFile(String fileName) throws IOException {
@@ -57,8 +53,7 @@ public class FileProcessorTest {
 
     @Before
     public void setUp() throws IOException {
-        generator = mock(CodeGenerator.class);
-        processor = new FileProcessor(generator);
+        processor = new FileProcessor.Builder().build();
         result = new StringBuilder();
         fonts = assets.newFolder("fonts1");
     }
@@ -107,20 +102,5 @@ public class FileProcessorTest {
     public void testProcessWhenNoFonts() throws Exception {
         List<FontFamily> families = processor.process(assets.getRoot());
         assertEquals(0, families.size());
-
-        verify(generator, never()).generate(any(FontFamily.class), any(Appendable.class));
-    }
-
-    @Test
-    public void testProcessWhenGeneratorThrowsException() throws Exception {
-        newFile("Muli.ttf");
-
-        doThrow(new IOException("BOOM")).when(generator).generate(any(FontFamily.class), any(Appendable.class));
-
-        exception.expect(RuntimeException.class);
-
-        processor.generate(assets.getRoot(), result);
-
-        assertFalse(result.toString().isEmpty());
     }
 }
