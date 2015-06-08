@@ -8,9 +8,10 @@ import digitaslbi.ext.common.FontFamily;
  * @see <a href="https://github.com/DigitasLbiMobile/AndroidTextExtensions">Android Text Extensions</a>
  */
 public class ComingSoon extends FontFamily {
-  public static final Font ComingSoon = new Font("ComingSoon", "fonts/Coming_Soon/ComingSoon.ttf");
 
-  public ComingSoon() {
-    super("ComingSoon", ComingSoon);
-  }
+    public static final Font ComingSoon = new Font("ComingSoon", "fonts/Coming_Soon/ComingSoon.ttf");
+
+    public ComingSoon() {
+        super("ComingSoon", ComingSoon);
+    }
 }

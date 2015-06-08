@@ -44,11 +44,13 @@ task docs(type: Javadoc) {
     configure(options) {
         docletpath = configurations.asciidoclet.files.asType(List)
         doclet = 'org.asciidoctor.Asciidoclet'
-        links 'http://docs.oracle.com/javase/7/docs/api/'
-        addStringOption "-base-dir", "${projectDir}"
-        addStringOption "-attribute", "name=${project.name}, version=${project.version}"
+        links = ['http://docs.oracle.com/javase/7/docs/api/']
         windowTitle = 'Android Text Extensions JavaDoc'
         docTitle = "Android Text Extensions Javadoc JavaDoc ($project.version)"
+        memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+        author = true
+        addStringOption "-base-dir", "${projectDir}"
+        addStringOption "-attribute", "name=${project.name}, version=${project.version}"
     }
 }
 
@@ -75,6 +77,7 @@ subprojects {
                 archives sourcesJar
                 archives javadocJar
             }
+
         }
 
         plugins.withId('com.android.library') {
@@ -111,7 +114,8 @@ subprojects {
                 source += files(android.sourceSets.main.java.srcDirs.collect { srcSet -> srcSet })
                 classpath += files(android.getBootClasspath().join(File.pathSeparator))
             }
-            rootProject.tasks.docs.dependsOn androidJavadocs
+
+            rootProject.tasks.docs.dependsOn androidJavadocs, androidSourcesJar
         }
 
     }

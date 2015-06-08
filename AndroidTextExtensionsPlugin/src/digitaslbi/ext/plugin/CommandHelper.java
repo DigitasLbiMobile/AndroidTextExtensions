@@ -60,8 +60,8 @@ public final class CommandHelper {
         }
     }
 
-    public static void runLater(final Runnable r) {
-        ApplicationManager.getApplication().invokeLater(r);
+    public static void runLater(final Project project, final Runnable r) {
+        DumbService.getInstance(project).smartInvokeLater(r);
     }
 
     static class ReadAction implements Runnable {

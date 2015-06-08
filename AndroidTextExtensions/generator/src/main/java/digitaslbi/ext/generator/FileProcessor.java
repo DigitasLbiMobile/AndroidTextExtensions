@@ -31,6 +31,7 @@ import static com.google.common.io.Files.fileTreeTraverser;
 import static com.google.common.io.Files.getFileExtension;
 import static digitaslbi.ext.common.Constants.ACCEPTED_FONTS_EXTENSIONS;
 import static digitaslbi.ext.common.Font.*;
+import static digitaslbi.ext.common.FontFamily.capitalize;
 
 /**
  * Processes a directory, usually the `assets` folder and calls a code {@link CodeGenerator} to create either Java classes
@@ -89,7 +90,7 @@ public class FileProcessor {
     protected void process(String fileName, Map<String, FontFamily> map) {
         final String nameWithoutExtension = Files.getNameWithoutExtension(fileName);
         final String fontFamilyName = getFontFamilyName(nameWithoutExtension);
-        final Font font = new Font(cleanupName(nameWithoutExtension), fileName);
+        final Font font = new Font(nameWithoutExtension, fileName);
 
         if (map.containsKey(fontFamilyName)) {
             map.get(fontFamilyName).addFont(font);
@@ -130,6 +131,10 @@ public class FileProcessor {
 
     public static String getFileName(FontFamily fontFamily, FileType fileType) {
         return fontFamily.getName() + fileType.getExtension();
+    }
+
+    public static String getFileName(String fileName, FileType fileType) {
+        return fileName + fileType.getExtension();
     }
 
     public static String fileNameWithRelativePath(File parentDir, File file) {
