@@ -16,21 +16,17 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import digitaslbi.ext.generator.FileProcessor;
 import digitaslbi.ext.generator.FontFamilyClassGenerator;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+import digitaslbi.ext.generator.TemplateEngine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.IOException;
-import java.util.Properties;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 import static com.google.common.io.Resources.getResource;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * Created by evelina on 13/05/15.
@@ -38,46 +34,39 @@ import static org.mockito.Mockito.mock;
 @RunWith(JUnit4.class)
 public class FontFamilyClassGeneratorTest {
 
-    FileProcessor processor;
     FontFamilyClassGenerator generator;
-    StringBuilder result;
 
     @Before
     public void setup() {
-        final VelocityEngine ve = new VelocityEngine();
-        final Properties properties = new Properties();
-        properties.setProperty("resource.loader", "file");
-        properties.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        ve.init(properties);
-
-        processor = mock(FileProcessor.class);
-        generator = new FontFamilyClassGenerator("digitaslbi.ext.fonts", ve.getTemplate("FontFamily.java.vm"), new VelocityContext());
-        result = new StringBuilder();
+        generator = new FontFamilyClassGenerator.Builder()
+                .withPackageName("digitaslbi.ext.fonts")
+                .withTemplateEngine(new TemplateEngine())
+                .build();
     }
 
 
     @Test
-    public void testGenerateFontFamilyWithMultipleFonts() throws IOException {
+    public void testGenerateFontFamilyWithMultipleFonts() throws Exception {
         FontFamily family = new FontFamily("NotoSerif",
                 new Font("NotoSerif.Bold", "fonts/Noto_Serif/NotoSerif-Bold.ttf"),
                 new Font("NotoSerif.BoldItalic", "fonts/Noto_Serif/NotoSerif-BoldItalic.ttf"),
                 new Font("NotoSerif.Italic", "fonts/Noto_Serif/NotoSerif-Italic.ttf"),
                 new Font("NotoSerif.Regular", "fonts/Noto_Serif/NotoSerif-Regular.ttf"));
 
-        generator.generate(family, result);
+        SimpleImmutableEntry<String, String> result = generator.generate(family);
 
         String expected = Resources.toString(getResource("NotoSerif.java"), Charsets.UTF_8);
-        assertEquals(expected, result.toString());
+        assertEquals(expected, result.getValue());
     }
 
     @Test
     public void testGenerateFontFamilyWithSingleFont() throws Exception {
         FontFamily family = new FontFamily("ComingSoon", new Font("ComingSoon", "fonts/Coming_Soon/ComingSoon.ttf"));
 
-        generator.generate(family, result);
+        SimpleImmutableEntry<String, String> result = generator.generate(family);
 
         String expected = Resources.toString(getResource("ComingSoon.java"), Charsets.UTF_8);
-        assertEquals(expected, result.toString());
+        assertEquals(expected, result.getValue());
     }
 
 

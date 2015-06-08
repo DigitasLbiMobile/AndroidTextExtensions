@@ -19,18 +19,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
-import digitaslbi.ext.generator.CodeGenerator.FileType;
 
 import java.io.File;
 import java.util.*;
 
 import static com.google.common.base.CharMatcher.anyOf;
 import static com.google.common.collect.Iterators.any;
-import static com.google.common.collect.Iterators.forArray;
 import static com.google.common.io.Files.fileTreeTraverser;
 import static com.google.common.io.Files.getFileExtension;
-import static digitaslbi.ext.common.Constants.ACCEPTED_FONTS_EXTENSIONS;
-import static digitaslbi.ext.common.Font.*;
+import static digitaslbi.ext.common.Font.ASSET_FILE_SEPARATORS;
+import static digitaslbi.ext.common.Font.NAME_PARTS_COUNT;
 import static digitaslbi.ext.common.FontFamily.capitalize;
 
 /**
@@ -39,22 +37,33 @@ import static digitaslbi.ext.common.FontFamily.capitalize;
  */
 public class FileProcessor {
 
-    protected final CodeGenerator generator;
-    protected final BootstrapClassGenerator bootstrapClassGenerator;
+    protected final List<String> fontTypes = new ArrayList<String>() {{
+        add("ttf");
+        add("otf");
+    }};
 
-    public FileProcessor(CodeGenerator generator) {
-        this.generator = generator;
-        this.bootstrapClassGenerator = null;
+    public FileProcessor(Builder builder) {
+        if (builder.fontTypes != null) {
+            fontTypes.clear();
+            fontTypes.addAll(builder.fontTypes);
+        }
     }
 
-    public FileProcessor(CodeGenerator generator, BootstrapClassGenerator bootstrapClassGenerator) {
-        this.generator = generator;
-        this.bootstrapClassGenerator = bootstrapClassGenerator;
+    public static class Builder {
+        private List<String> fontTypes;
+
+        public Builder withFontTypes(String... fontTypes) {
+            this.fontTypes = Arrays.asList(fontTypes);
+            return this;
+        }
+
+        public FileProcessor build() {
+            return new FileProcessor(this);
+        }
     }
 
     public List<FontFamily> process(File inputDir) {
         final Map<String, FontFamily> map = new HashMap<String, FontFamily>();
-
         final Collection<File> files = new ArrayList<File>();
         collectFiles(inputDir, files);
 
@@ -65,7 +74,7 @@ public class FileProcessor {
         return ImmutableList.copyOf(map.values());
     }
 
-    private void collectFiles(File input, Collection<File> files) {
+    protected void collectFiles(File input, Collection<File> files) {
         if (input.isDirectory()) {
             for (File file : fileTreeTraverser().children(input)) {
                 if (file.isDirectory()) {
@@ -77,14 +86,6 @@ public class FileProcessor {
         } else if (isValidFontFile(input)) {
             files.add(input);
         }
-    }
-
-    public void generate(File inputDir, File output) throws Exception {
-        output(process(inputDir), output, null);
-    }
-
-    public void generate(File inputDir, Appendable output) throws Exception {
-        output(process(inputDir), null, output);
     }
 
     protected void process(String fileName, Map<String, FontFamily> map) {
@@ -99,28 +100,8 @@ public class FileProcessor {
         }
     }
 
-    private void output(List<FontFamily> fontFamilies, File file, Appendable appendable) throws Exception {
-        for (FontFamily fontFamily : fontFamilies) {
-            try {
-                if (file != null) {
-                    generator.generate(fontFamily, file);
-                } else {
-                    generator.generate(fontFamily, appendable);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-        if (bootstrapClassGenerator != null) {
-            if (file != null) {
-                bootstrapClassGenerator.generate(fontFamilies, file);
-            } else {
-                bootstrapClassGenerator.generate(fontFamilies, appendable);
-            }
-        }
-    }
 
-    public static String getFontFamilyName(String fileName) {
+    protected String getFontFamilyName(String fileName) {
         final String assetName = Files.getNameWithoutExtension(fileName);
         return capitalize(Splitter.on(anyOf(ASSET_FILE_SEPARATORS))
                 .trimResults()
@@ -129,15 +110,7 @@ public class FileProcessor {
                 .split(assetName).iterator().next());
     }
 
-    public static String getFileName(FontFamily fontFamily, FileType fileType) {
-        return fontFamily.getName() + fileType.getExtension();
-    }
-
-    public static String getFileName(String fileName, FileType fileType) {
-        return fileName + fileType.getExtension();
-    }
-
-    public static String fileNameWithRelativePath(File parentDir, File file) {
+    protected String fileNameWithRelativePath(File parentDir, File file) {
         String path = file.getAbsolutePath().replace(parentDir.getAbsolutePath(), "");
         if (path.startsWith(File.separator)) {
             return path.substring(1);
@@ -145,16 +118,16 @@ public class FileProcessor {
         return path;
     }
 
-    public static boolean isValidFontFile(File input) {
+    public boolean isValidFontFile(File input) {
         return input.isFile() && isValidFontExtension(input.getName());
     }
 
-    public static boolean isValidFontExtension(String fileName) {
-        final String ext = getFileExtension(fileName);
-        return any(forArray(ACCEPTED_FONTS_EXTENSIONS), new Predicate<String>() {
+    public boolean isValidFontExtension(String fileName) {
+        final String extension = getFileExtension(fileName);
+        return any(fontTypes.iterator(), new Predicate<String>() {
             @Override
             public boolean apply(String input) {
-                return input.equals(ext);
+                return input.equals(extension);
             }
         });
     }
