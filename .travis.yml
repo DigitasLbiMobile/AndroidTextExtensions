@@ -22,6 +22,19 @@ android:
     # if you need to run emulator(s) during your tests
     - sys-img-armeabi-v7a-android-21
 
+jdk:
+  - openjdk6
+  - oraclejdk7
+
 env:
-  - PROJECT_DIR=AndroidTextExtensions
-script: cd $PROJECT_DIR && ./gradlew clean build test --stacktrace             
+    global:
+    - JAVA6_HOME=/usr/lib/jvm/java-6-openjdk-amd64
+    - PROJECT_DIR=AndroidTextExtensions
+
+script:
+  - jdk_switcher use openjdk6
+  - # do stuff with Java 6
+  - cd $PROJECT_DIR && ./gradlew :common:clean :generator:clean :common:build :generator:build :generator:test --stacktrace    
+  - jdk_switcher use oraclejdk7
+  - # do stuff with Java 7 
+  - ./gradlew :library:clean :library:build :library:test :sample:clean :sample:assembleDebug --stacktrace 

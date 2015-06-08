@@ -32,13 +32,20 @@ public class FontFamily {
     protected final List<Font> mFonts = new ArrayList<Font>();
 
     public FontFamily(String name) {
-        mName = name;
+        mName = capitalize(name);
     }
 
     public FontFamily(String name, Font... fonts) {
         this(name);
         checkNotNull(fonts);
         mFonts.addAll(asList(fonts));
+    }
+
+    public static String capitalize(String string) {
+        if (string == null || string.length() == 0) {
+            return string;
+        }
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
 
     public String getName() {

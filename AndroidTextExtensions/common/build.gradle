@@ -13,8 +13,12 @@
 apply plugin: 'java'
 
 compileJava {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+    sourceCompatibility = JavaVersion.VERSION_1_6
+    targetCompatibility = JavaVersion.VERSION_1_6
+
+    //enable compilation in a separate daemon process
+    options.fork = System.getenv("TRAVIS_BUILD_NUMBER") == null
+    options.forkOptions.executable = "${System.getenv("JAVA6_HOME")}/bin/javac"
 }
 
 dependencies {

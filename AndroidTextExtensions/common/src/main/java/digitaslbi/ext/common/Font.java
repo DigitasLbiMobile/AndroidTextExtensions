@@ -29,11 +29,31 @@ public class Font {
     public static final int NAME_PARTS_COUNT = 2;
 
     protected final String mName;
+    protected final String mFieldName;
+    protected final String mStyleName;
     protected final String mAssetName;
 
     public Font(String name, String assetName) {
-        mName = name;
+        mName = cleanupName(name);
         mAssetName = assetName;
+        mFieldName = styleNameToName(mName);
+        mStyleName = nameToStyleName(mName);
+    }
+
+    private String cleanupName(String name) {
+        return Joiner.on(CLASS_NAME_SEPARATOR)
+                .join(Splitter.on(anyOf(ASSET_FILE_SEPARATORS))
+                        .trimResults()
+                        .omitEmptyStrings()
+                        .split(name));
+    }
+
+    private String nameToStyleName(String fontName) {
+        return fontName.replace(CLASS_NAME_SEPARATOR, STYLE_NAME_SEPARATOR);
+    }
+
+    private String styleNameToName(String styleName) {
+        return styleName.replace(STYLE_NAME_SEPARATOR, CLASS_NAME_SEPARATOR);
     }
 
     public String getAssetName() {
@@ -42,6 +62,14 @@ public class Font {
 
     public String getName() {
         return mName;
+    }
+
+    public String getFieldName() {
+        return mFieldName;
+    }
+
+    public String getStyleName() {
+        return mStyleName;
     }
 
     @Override
@@ -63,28 +91,5 @@ public class Font {
     @Override
     public String toString() {
         return mName;
-    }
-
-    public static String cleanupName(String name) {
-        return Joiner.on(CLASS_NAME_SEPARATOR)
-                .join(Splitter.on(anyOf(ASSET_FILE_SEPARATORS))
-                        .trimResults()
-                        .omitEmptyStrings()
-                        .split(name));
-    }
-
-    public static String capitalize(String string) {
-        if (string == null || string.length() == 0) {
-            return string;
-        }
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
-    }
-
-    public static String nameToStyleName(String fontName) {
-        return fontName.replace(CLASS_NAME_SEPARATOR, STYLE_NAME_SEPARATOR);
-    }
-
-    public static String styleNameToName(String styleName) {
-        return styleName.replace(STYLE_NAME_SEPARATOR, CLASS_NAME_SEPARATOR);
     }
 }

@@ -18,12 +18,15 @@ import digitaslbi.ext.common.Font;
 import digitaslbi.ext.common.FontFamily;
 import digitaslbi.ext.generator.FileProcessor;
 import digitaslbi.ext.generator.FontFamilyClassGenerator;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import static com.google.common.io.Resources.getResource;
 import static org.junit.Assert.assertEquals;
@@ -41,8 +44,14 @@ public class FontFamilyClassGeneratorTest {
 
     @Before
     public void setup() {
+        final VelocityEngine ve = new VelocityEngine();
+        final Properties properties = new Properties();
+        properties.setProperty("resource.loader", "file");
+        properties.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        ve.init(properties);
+
         processor = mock(FileProcessor.class);
-        generator = new FontFamilyClassGenerator("digitaslbi.ext.fonts");
+        generator = new FontFamilyClassGenerator("digitaslbi.ext.fonts", ve.getTemplate("FontFamily.java.vm"), new VelocityContext());
         result = new StringBuilder();
     }
 
