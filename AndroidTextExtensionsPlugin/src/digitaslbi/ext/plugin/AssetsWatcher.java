@@ -23,13 +23,11 @@ import com.intellij.util.Processor;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.update.MergingUpdateQueue;
 import digitaslbi.ext.common.Constants;
-import digitaslbi.ext.plugin.models.AndroidProject;
 import digitaslbi.ext.plugin.utils.Dialogs;
 import digitaslbi.ext.plugin.utils.Log;
 import org.jetbrains.android.util.AndroidUtils;
 import org.jetbrains.annotations.NotNull;
 
-import javax.xml.transform.TransformerConfigurationException;
 import java.io.IOException;
 import java.util.List;
 
@@ -46,9 +44,9 @@ public class AssetsWatcher {
     private final VirtualFileProcessor fileProcessor;
     private final MergingUpdateQueue updateQueue;
     private MessageBusConnection connection;
-    private AndroidProject androidProject;
+    private AndroidTextExtensionsPlugin plugin;
 
-    public AssetsWatcher(Project project) throws TransformerConfigurationException {
+    public AssetsWatcher(Project project) {
         this.project = project;
         this.fileProcessor = new VirtualFileProcessor();
         this.updateQueue = new MergingUpdateQueue(getClass() + ": Assets changes queue", 1000, false, MergingUpdateQueue.ANY_COMPONENT);
@@ -66,7 +64,11 @@ public class AssetsWatcher {
             public void before(@NotNull List<? extends VFileEvent> events) {
                 for (VFileEvent event : events) {
                     if (isRelevantEvent(event)) {
-                        processBeforeEvent(event);
+                        try {
+                            processBeforeEvent(event);
+                        } catch (PluginException e) {
+                            Dialogs.showError(project, format("Failed to process change asset event %s: %s", event.getPath(), e.getMessage()));
+                        }
                     }
                 }
             }
@@ -88,13 +90,12 @@ public class AssetsWatcher {
                 (event.getFile().isDirectory() || fileProcessor.isValidFontFile(event.getFile()));
     }
 
-    private void processBeforeEvent(VFileEvent event) {
+    private void processBeforeEvent(VFileEvent event) throws PluginException {
         if (event.getFile() == null) {
-            Log.e(getClass(), "Event file %s is null.", event.getPath());
-            return;
+            throw new PluginException("Event file %s is null.", event.getPath());
         }
 
-        androidProject = new AndroidProject(project, event.getFile());
+        plugin = new AndroidTextExtensionsPlugin(project, event.getFile());
 
         if (event instanceof VFileDeleteEvent) {
             if (event.getFile().isDirectory()) {
@@ -125,7 +126,11 @@ public class AssetsWatcher {
         runLater(project, new Runnable() {
             @Override
             public void run() {
-                androidProject.generate();
+                try {
+                    plugin.generate();
+                } catch (PluginException e) {
+                    Dialogs.showError(project, format("Failed to re-generate files after assets changed in %s: %s", event.getPath(), e.getMessage()));
+                }
             }
         });
     }
@@ -147,8 +152,7 @@ public class AssetsWatcher {
                                 try {
                                     file.delete(null);
                                 } catch (IOException e) {
-                                    Log.e(getClass(), e, "Failed to delete %s.", fileToDelete);
-                                    Dialogs.showErrorDialog(format("Failed to delete %s:\n%s", fileToDelete, e.getMessage()), project);
+                                    Dialogs.showError(project, format("Failed to delete file %s after assets changed: %s.", fileToDelete, e.getMessage()));
                                 }
                                 return false;
                             }

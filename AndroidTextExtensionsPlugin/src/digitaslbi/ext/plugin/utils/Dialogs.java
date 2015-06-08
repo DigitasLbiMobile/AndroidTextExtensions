@@ -20,33 +20,20 @@ import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
 
-import static java.lang.String.format;
-
 /**
  * Created by evelina on 14/05/15.
  */
 public class Dialogs {
 
-    public static final String MISSING_FOLDER = "Can't find the '%s' folder inside project %s.";
-    public static final String MISSING_MODULE = "Can't find module for file %s inside project %s.";
-
-    public static void showInfoDialog(String text, Project project) {
-        showDialog(MessageType.INFO, text, project);
+    public static void showInfo(Project project, String text) {
+        showDialog(project, MessageType.INFO, text);
     }
 
-    public static void showErrorDialog(String text, Project project) {
-        showDialog(MessageType.ERROR, text, project);
+    public static void showError(Project project, String text) {
+        showDialog(project, MessageType.ERROR, text);
     }
 
-    public static void showFolderNotFoundDialog(String folderName, Project project) {
-        showDialog(MessageType.ERROR, format(MISSING_FOLDER, folderName, project.getName()), project);
-    }
-
-    public static void showModuleNotFoundError(String fileName, Project project) {
-        showErrorDialog(format(MISSING_MODULE, fileName, project.getName()), project);
-    }
-
-    public static void showDialog(MessageType type, String text, Project project) {
+    public static void showDialog(Project project, MessageType type, String text) {
         StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
         if (statusBar != null) {
             JBPopupFactory.getInstance()

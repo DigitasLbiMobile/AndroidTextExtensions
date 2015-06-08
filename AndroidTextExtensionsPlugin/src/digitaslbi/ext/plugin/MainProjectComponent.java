@@ -14,8 +14,6 @@ package digitaslbi.ext.plugin;
 
 import com.intellij.openapi.components.AbstractProjectComponent;
 import com.intellij.openapi.project.Project;
-import digitaslbi.ext.plugin.utils.Dialogs;
-import digitaslbi.ext.plugin.utils.Log;
 import org.jetbrains.annotations.NotNull;
 
 import static digitaslbi.ext.plugin.utils.CommandHelper.runWhenInitialized;
@@ -36,13 +34,8 @@ public class MainProjectComponent extends AbstractProjectComponent {
     public void initComponent() {
         runWhenInitialized(myProject, new Runnable() {
             public void run() {
-                try {
-                    assetsWatcher = new AssetsWatcher(myProject);
-                    assetsWatcher.start();
-                } catch (Exception e) {
-                    Log.e(getClass(), e, "Exception when initializing AssetWatcher.");
-                    Dialogs.showErrorDialog("Can't instantiate the AssetWatcher.", myProject);
-                }
+                assetsWatcher = new AssetsWatcher(myProject);
+                assetsWatcher.start();
             }
         });
     }

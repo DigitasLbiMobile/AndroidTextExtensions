@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package digitaslbi.ext.plugin.models;
+package digitaslbi.ext.plugin;
 
 import com.google.common.base.Objects;
 import com.intellij.openapi.module.Module;
@@ -21,7 +21,7 @@ import java.io.File;
 /**
  * @author Evelina Vrabie on 26/05/15.
  */
-public class AndroidSource {
+public class GeneratorSource {
     private final String name;
     private final Module module;
     private final String packageName;
@@ -31,7 +31,7 @@ public class AndroidSource {
     private File javaDir;
     private File resDir;
 
-    public AndroidSource(String name, Module module, String packageName) {
+    public GeneratorSource(String name, Module module, String packageName) {
         this.name = name;
         this.module = module;
         this.packageName = packageName;
@@ -82,7 +82,7 @@ public class AndroidSource {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AndroidSource source = (AndroidSource) o;
+        GeneratorSource source = (GeneratorSource) o;
         return Objects.equal(name, source.name);
     }
 
@@ -93,7 +93,7 @@ public class AndroidSource {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("AndroidSource{");
+        final StringBuilder sb = new StringBuilder("GeneratorSource{");
         sb.append("name='").append(name).append('\'');
         sb.append(", packageName='").append(packageName).append('\'');
         sb.append(", parentDir=").append(parentDir.getPath());
