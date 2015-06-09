@@ -20,7 +20,30 @@ compileJava {
     options.fork = System.getenv("TRAVIS_BUILD_NUMBER") == null
     options.forkOptions.executable = "${JAVA6_HOME}/bin/javac"
 }
+artifacts.add("default", file('common.jar'))
 
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
+jar {
+    dependsOn configurations.compile
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+
+afterEvaluate {
+    task copyJar(type: Copy) {
+        into "${rootDir}/library/libs"
+        from jar
+    }
+    task copySourcesJar(type: Copy) {
+        into "${rootDir}/library/libs"
+        from project.tasks['sourcesJar']
+    }
+    assemble.dependsOn copyJar, copySourcesJar
+}
 dependencies {
     compile 'com.google.guava:guava:18.0'
 }
