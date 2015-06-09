@@ -18,8 +18,7 @@ compileJava {
 
     //enable compilation in a separate daemon process
     options.fork = System.getenv("TRAVIS_BUILD_NUMBER") == null
-    options.forkOptions.executable = "${System.getenv("JAVA6_HOME")}/bin/javac"
-}
+    options.forkOptions.executable = "${JAVA6_HOME}/bin/javac"}
 
 dependencies {
     compile 'com.google.guava:guava:18.0'
