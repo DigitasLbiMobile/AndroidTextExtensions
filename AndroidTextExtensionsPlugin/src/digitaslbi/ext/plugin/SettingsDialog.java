@@ -40,7 +40,7 @@ public class SettingsDialog extends DialogWrapper {
         this.project = plugin.getProject();
         init();
         setModal(true);
-        setTitle(ResourceBundle.getBundle("digitaslbi.ext.plugin.labels").getString("title"));
+        setTitle(ResourceBundle.getBundle("digitaslbi.ext.plugin.strings").getString("title"));
     }
 
     @Override protected void init() {
