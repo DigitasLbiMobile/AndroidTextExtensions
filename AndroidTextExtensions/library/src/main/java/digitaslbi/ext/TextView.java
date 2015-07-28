@@ -124,10 +124,12 @@ public class TextView extends android.widget.TextView {
     }
 
     private Rect getExtraPadding() {
-        MultiDrawablesExtension<android.widget.TextView> drawablesExtension = (MultiDrawablesExtension<android.widget.TextView>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
         Rect extraPadding = MultiDrawablesExtension.EMPTY_RECT;
-        if (drawablesExtension != null) {
-            extraPadding = drawablesExtension.getInsets();
+        if (mExtensions != null) {
+            MultiDrawablesExtension<android.widget.TextView> drawablesExtension = (MultiDrawablesExtension<android.widget.TextView>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+            if (drawablesExtension != null) {
+                extraPadding = drawablesExtension.getInsets();
+            }
         }
         return extraPadding;
     }
