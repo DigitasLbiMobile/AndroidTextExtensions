@@ -180,9 +180,11 @@ public class Button extends android.widget.Button {
     }
 
     private boolean verifyDrawableExt(Drawable who) {
-        MultiDrawablesExtension<android.widget.TextView> drawablesExtension = (MultiDrawablesExtension<android.widget.TextView>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
-        if (drawablesExtension != null) {
-            return drawablesExtension.verifyDrawable(who);
+        if (mExtensions != null) {
+            MultiDrawablesExtension<android.widget.TextView> drawablesExtension = (MultiDrawablesExtension<android.widget.TextView>) mExtensions.findExtension(Extension.DRAWABLE_EXTENSION);
+            if (drawablesExtension != null) {
+                return drawablesExtension.verifyDrawable(who);
+            }
         }
         return false;
     }
