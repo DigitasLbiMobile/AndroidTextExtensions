@@ -33,7 +33,7 @@ import digitaslbi.ext.font.FontExtension;
  * Extends {@link android.widget.TextView} to delegate functionality to a collection
  * of extensions based on {@link ViewExtension}.
  */
-public class TextView extends android.widget.TextView {
+public class Button extends android.widget.Button {
 
     public static final int DEFAULT_STYLE_ATTR = android.R.attr.textViewStyle;
 
@@ -41,23 +41,23 @@ public class TextView extends android.widget.TextView {
 
     private Rect mIntrinsicPadding;
 
-    public TextView(Context context) {
+    public Button(Context context) {
         super(context);
         init(context, null, 0, 0);
     }
 
-    public TextView(Context context, AttributeSet attrs) {
+    public Button(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs, 0, 0);
     }
 
-    public TextView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public Button(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs, defStyleAttr, 0);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public TextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public Button(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
     }
